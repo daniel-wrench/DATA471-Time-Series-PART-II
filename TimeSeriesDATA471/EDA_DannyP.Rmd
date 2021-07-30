@@ -1,0 +1,41 @@
+---
+title: "EDA"
+output: html_notebook
+---
+
+
+
+```{r libraries, message=FALSE, warning=FALSE,error=FALSE}
+# Load libraries
+library(RCurl)
+library(tidyverse)
+library(magrittr)
+```
+
+```{r}
+urlResponse <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
+df <- read.csv(text=urlResponse)
+head(df)
+```
+```{r}
+colSums(is.na(df))
+```
+```{r}
+# Drop columns with all NA values
+data <- df %>%
+  select(.,-c(forecast.wind.offshore.eday.ahead,generation.hydro.pumped.storage.aggregated))
+
+# List incomplete cases
+data[!complete.cases(data),]
+```
+```{r}
+# Number of NAs per row
+rowSums(is.na(data[!complete.cases(data),]))
+```
+
+```{r}
+noTime <- data[complete.cases(data),] %>% select(-time)
+
+cor(noTime)
+```
+
