@@ -10,16 +10,24 @@ output: html_notebook
 library(RCurl)
 library(tidyverse)
 library(magrittr)
+library(plotly)
+library(imputeTS)
+library(lubridate)
+urlResponse <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
+df <- read.csv(text=urlResponse)
 ```
 
 ```{r}
-urlResponse <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
-df <- read.csv(text=urlResponse)
-head(df)
+str(df)
 ```
+
+## Missingness
+
+There are two columns, generation.hydro.pumped.storage.aggregated and forecast.wind.offshore.eday.ahead, which contain no values. All other columns contain 36 or less missing values.
 ```{r}
 colSums(is.na(df))
 ```
+After dropping the two empty columns we have 47 incomplete cases. 
 ```{r}
 # Drop columns with all NA values
 data <- df %>%
@@ -28,14 +36,98 @@ data <- df %>%
 # List incomplete cases
 data[!complete.cases(data),]
 ```
+
+
+
 ```{r}
 # Number of NAs per row
 rowSums(is.na(data[!complete.cases(data),]))
 ```
 
-```{r}
-noTime <- data[complete.cases(data),] %>% select(-time)
 
-cor(noTime)
+```{r}
+# Formatting
+data$time <- as.POSIXlt(data$time)
+
+gen_data <- data %>%
+  select(1, 1:21) %>%
+  pivot_longer(generation.biomass:generation.wind.onshore, names_to = "type")
+
+gen_data$type <- as.factor(gen_data$type)
+
+# Plot distribution of generation missingness 
+ggplot_na_distribution(x=gen_data$value, y=gen_data$time)
+```
+
+
+```{r}
+
+
+generation_plot <- ggplot() +
+  geom_bar(data = gen_data, stat = "identity", aes(x = time, y = value, fill = type)) +
+  geom_line(data = data, aes(x = time, y = total.load.actual)) +
+  theme_minimal() +
+  guides(fill = FALSE) 
+
+generation_plot
+```
+
+```{r}
+gen_data$year <- year(gen_data$time)
+gen_data$month <- month(gen_data$time)
+gen_data$day <- day(gen_data$time)
+gen_data$hour <- hour(gen_data$time)
+
+hourly_generation_plot_by_year <- gen_data %>%
+  ggplot(aes(x = hour, y = value, fill = type)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year)
+
+hourly_generation_plot_by_year
+```
+
+```{r}
+daily_generation_plot_by_year <- gen_data %>%
+  ggplot(aes(x = day, y = value, fill = type)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year)
+
+daily_generation_plot_by_year
+```
+
+```{r}
+monthly_generation_plot <- gen_data %>%
+  ggplot(aes(x = month, y = value, fill = type)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year)
+
+monthly_generation_plot
+```
+
+
+
+
+```{r}
+price_vs_forecast <- data %>%
+  select(., c(time, price.actual, price.day.ahead)) 
+
+price_vs_forecast$time <- ymd(price_vs_forecast$time)
+price_vs_forecast$difference <- price_vs_forecast$price.day.ahead - price_vs_forecast$price.actual
+
+price_vs_forecast %>%
+  ggplot() +
+  geom_line(aes(x=time, y=difference))
+```
+```{r}
+load_vs_forecast <- data %>%
+  select(., c(time, total.load.actual, total.load.forecast))
+
+load_vs_forecast$time <- ymd(load_vs_forecast$time)
+load_vs_forecast$difference <- load_vs_forecast$total.load.forecast - load_vs_forecast$total.load.actual
+
+load_vs_forecast %>%
+  ggplot() +
+  geom_line(aes(x=time, y=difference))
+```
 ```
 
