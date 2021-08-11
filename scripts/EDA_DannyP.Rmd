@@ -3,9 +3,7 @@ title: "EDA"
 output: html_notebook
 ---
 
-
-
-```{r libraries, message=FALSE, warning=FALSE,error=FALSE}
+```{r libraries, message=FALSE, warning=FALSE, error=FALSE}
 # Load libraries
 library(RCurl)
 library(tidyverse)
@@ -13,17 +11,19 @@ library(magrittr)
 library(plotly)
 library(imputeTS)
 library(lubridate)
-urlResponse <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
-df <- read.csv(text=urlResponse)
 ```
 
 ```{r}
-str(df)
+# Load data (relative file path) and view contents
+df <- read.csv("../data/energy_dataset.csv")
+head(df)
+dim(df)
+summary(df)
 ```
 
 ## Missingness
 
-There are two columns, generation.hydro.pumped.storage.aggregated and forecast.wind.offshore.eday.ahead, which contain no values. All other columns contain 36 or less missing values.
+There are six columns that contain no values (all NAs or zeroes). All other columns contain 36 or fewer missing values.
 ```{r}
 colSums(is.na(df))
 ```
