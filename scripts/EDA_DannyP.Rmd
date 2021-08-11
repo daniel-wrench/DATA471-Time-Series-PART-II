@@ -1,5 +1,5 @@
 ---
-title: "EDA of electricity time series"
+title: "EDA of Spanish electricity generation time series"
 output: html_notebook
 ---
 
@@ -11,6 +11,7 @@ library(magrittr)
 library(plotly)
 library(imputeTS)
 library(lubridate)
+library(timetk)
 ```
 
 ```{r echo=TRUE}
@@ -34,7 +35,7 @@ summary(df) # Distribution and missingness for each variable
 There are six columns that contain no values (all NAs or zeroes) which are removed here.
 
 ```{r}
-df_v2 <- df |> 
+df_clean <- df |> 
   select(-c(generation.fossil.coal.derived.gas,
             generation.fossil.oil.shale,
             generation.fossil.peat,
@@ -47,16 +48,18 @@ df_v2 <- df |>
 
 
 ```{r}
-colSums(is.na(df_v2)) # Number of missing values for each remaining variable
+colSums(is.na(df_clean)) # Number of missing values for each remaining variable
 ```
 16 out of 21 of the remaining variables each have a maximum of 36 missing values. Looking at where these occur, we see that most missing values occur across variables. Specifically, 90% of the missing values are of these occur over only 18 rows. The remaining 10% are spread across 28 rows.
 
 ```{r}
 # Rows where data is missing
-df_v2[!complete.cases(df_v2),]
+df_clean[!complete.cases(df_clean),]
+```
 
+```{r}
 # Number of NAs per row
-missing_per_row <- rowSums(is.na(df_v2[!complete.cases(df_v2),]))
+missing_per_row <- rowSums(is.na(df_clean[!complete.cases(df_clean),]))
 missing_per_row
 sum(missing_per_row > 1)
 sum(missing_per_row[missing_per_row > 1])/sum(missing_per_row)
@@ -65,47 +68,87 @@ sum(missing_per_row[missing_per_row > 1])/sum(missing_per_row)
 
 ```{r}
 # Formatting
-data$time <- as.POSIXlt(data$time)
 
-gen_data <- data %>%
-  select(1, 1:21) %>%
-  pivot_longer(generation.biomass:generation.wind.onshore, names_to = "type")
-
-gen_data$type <- as.factor(gen_data$type)
-
-# Plot distribution of generation missingness 
-ggplot_na_distribution(x=gen_data$value, y=gen_data$time)
+# Changing time variable to datetime object
+# NB:  Both UTC+1 and UTC+2 time-zones - date functions automatically pick this up and convert to UTC
+df_clean$time <- as_datetime(df_clean$time)
+head(df_clean)
 ```
 
+### Focusing on generation variables
 
 ```{r}
-
-
-generation_plot <- ggplot() +
-  geom_bar(data = gen_data, stat = "identity", aes(x = time, y = value, fill = type)) +
-  geom_line(data = data, aes(x = time, y = total.load.actual)) +
-  theme_minimal() +
-  guides(fill = FALSE) 
-
-generation_plot
+gen_data <- df_clean |> 
+  select(c(1, starts_with("generation")))
 ```
 
 ```{r}
-gen_data$year <- year(gen_data$time)
-gen_data$month <- month(gen_data$time)
-gen_data$day <- day(gen_data$time)
-gen_data$hour <- hour(gen_data$time)
+# Converting to long form
+long_gen_data <- gen_data  |> 
+  pivot_longer(cols = -time, names_to = "generation_source") |> 
+  mutate(generation_source = str_replace(generation_source, "generation.", ""))
 
-hourly_generation_plot_by_year <- gen_data %>%
-  ggplot(aes(x = hour, y = value, fill = type)) +
-  geom_bar(stat = "identity") + theme(legend.position = "none") 
+head(long_gen_data)
+```
+
+
+Plot distribution of (generation) data missingness
+
+```{r}
+# NB: MAYBE DON'T DO WHOLE DATASET LOCALLY, IT CRASHED MY R SESSION
+long_gen_data_small <- long_gen_data[1:10000,]
+ggplot_na_distribution(x=long_gen_data_small$value, y=long_gen_data_small$time)
+```
+Smoothing the data on a daily scale
+```{r}
+gen_data_smoothed <- long_gen_data |> 
+  group_by(generation_source) |> 
+  summarise_by_time(time, .by = 'day', adjusted = mean(value)) 
+
+head(gen_data_smoothed)
+```
+
+Looking at four series over time in isolation, with quarterly smoothing
+(This function is nice as it includes an interactive feature)
+
+```{r}
+gen_data_smoothed |> filter(generation_source %in% c(
+  "biomass", "fossil.gas", "nuclear", "solar")) |> 
+  plot_time_series(time, adjusted, .facet_ncol = 2,
+                   .smooth_period = "3 months")
+```
+
+Looking at all generation sources together on an area chart
+
+```{r}
+long_gen_data |> 
+  group_by(generation_source) |> 
+  summarise_by_time(time, .by = '2 months', adjusted = mean(value)) |> 
+  ggplot() +
+  geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity") + 
+  #geom_line(data = df_clean, aes(x = time, y = total.load.actual)) +
+  theme_minimal()
+```
+
+
+Looking at the daily variation of each generation source
+
+```{r}
+long_gen_data$year <- year(long_gen_data$time)
+long_gen_data$month <- month(long_gen_data$time)
+long_gen_data$day <- day(long_gen_data$time)
+long_gen_data$hour <- hour(long_gen_data$time)
+
+hourly_generation_plot_by_year <- long_gen_data %>%
+  ggplot(aes(x = hour, y = value, fill = generation_source)) +
+  geom_bar(stat = "identity")
 
 hourly_generation_plot_by_year
 ```
 
 ```{r}
-daily_generation_plot_by_year <- gen_data %>%
-  ggplot(aes(x = day, y = value, fill = type)) +
+daily_generation_plot_by_year <- long_gen_data %>%
+  ggplot(aes(x = day, y = value, fill = generation_source)) +
   geom_bar(stat = "identity") +
   facet_wrap(~year) + theme(legend.position = "none") 
 
@@ -113,8 +156,8 @@ daily_generation_plot_by_year
 ```
 
 ```{r}
-monthly_generation_plot <- gen_data %>%
-  ggplot(aes(x = month, y = value, fill = type)) +
+monthly_generation_plot <- long_gen_data %>%
+  ggplot(aes(x = month, y = value, fill = generation_source)) +
   geom_bar(stat = "identity") +
   facet_wrap(~year)
 
@@ -125,7 +168,7 @@ monthly_generation_plot
 
 
 ```{r}
-price_vs_forecast <- data %>%
+price_vs_forecast <- df_clean %>%
   select(., c(time, price.actual, price.day.ahead)) 
 
 price_vs_forecast$time <- ymd(price_vs_forecast$time)
@@ -135,8 +178,10 @@ price_vs_forecast %>%
   ggplot() +
   geom_line(aes(x=time, y=difference))
 ```
+
+
 ```{r}
-load_vs_forecast <- data %>%
+load_vs_forecast <- df_clean %>%
   select(., c(time, total.load.actual, total.load.forecast))
 
 load_vs_forecast$time <- ymd(load_vs_forecast$time)
