@@ -1,7 +1,15 @@
 ---
 title: "EDA of Spanish electricity generation time series"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
+
+#### Next steps
+
+-   Investigate seasonality and long-term trends for each variable
+
+-   
 
 ```{r libraries, message=FALSE, warning=FALSE, error=FALSE}
 # Load libraries
@@ -24,15 +32,14 @@ head(df)
 dim(df) # Number of rows and columns
 ```
 
-
 ```{r}
 summary(df) # Distribution and missingness for each variable
+#describe(df)
 ```
- 
 
 ## Missing data
 
-There are six columns that contain no values (all NAs or zeroes) which are removed here.
+There are eight columns that contain no values (all NAs or zeroes). These are removed here.
 
 ```{r}
 df_clean <- df |> 
@@ -46,11 +53,11 @@ df_clean <- df |>
             forecast.wind.offshore.eday.ahead))
 ```
 
-
 ```{r}
 colSums(is.na(df_clean)) # Number of missing values for each remaining variable
 ```
-16 out of 21 of the remaining variables each have a maximum of 36 missing values. Looking at where these occur, we see that most missing values occur across variables. Specifically, 90% of the missing values are of these occur over only 18 rows. The remaining 10% are spread across 28 rows.
+
+16 out of 22 of the remaining variables each have a maximum of 36 missing values. Looking at where these occur, we see that most missing values occur across variables. Specifically, 90% of the missing values occur over only 18 rows. The remaining 10% are spread across 28 rows.
 
 ```{r}
 # Rows where data is missing
@@ -64,13 +71,31 @@ missing_per_row
 sum(missing_per_row > 1)
 sum(missing_per_row[missing_per_row > 1])/sum(missing_per_row)
 ```
+
+What are we left with?
+
+```{r}
+tail(df_clean)
+```
+
+35,000 obs across 20 variables, hourly from start 2015 to end 2018:
+
+-   Energy generation from 14 different sources
+
+-   Forecast onshore wind and solar, one day ahead
+
+-   Forecast and actual total electricity load
+
+-   Forecast and actual electricity price
+
+And in the other dataset, not yet loaded: hourly weather data over the same period for a number of Spanish cities
+
 ## Plotting
 
 ```{r}
-# Formatting
+# Formatting time variable to datetime object
+# NB:  Time contains both UTC+1 and UTC+2 time-zones - date functions automatically pick this up and convert to UTC
 
-# Changing time variable to datetime object
-# NB:  Both UTC+1 and UTC+2 time-zones - date functions automatically pick this up and convert to UTC
 df_clean$time <- as_datetime(df_clean$time)
 head(df_clean)
 ```
@@ -91,7 +116,6 @@ long_gen_data <- gen_data  |>
 head(long_gen_data)
 ```
 
-
 Plot distribution of (generation) data missingness
 
 ```{r}
@@ -99,7 +123,9 @@ Plot distribution of (generation) data missingness
 long_gen_data_small <- long_gen_data[1:10000,]
 ggplot_na_distribution(x=long_gen_data_small$value, y=long_gen_data_small$time)
 ```
+
 Smoothing the data on a daily scale
+
 ```{r}
 gen_data_smoothed <- long_gen_data |> 
   group_by(generation_source) |> 
@@ -108,8 +134,7 @@ gen_data_smoothed <- long_gen_data |>
 head(gen_data_smoothed)
 ```
 
-Looking at four series over time in isolation, with quarterly smoothing
-(This function is nice as it includes an interactive feature)
+Looking at four series over time in isolation, with quarterly smoothing (This function is nice as it includes an interactive feature)
 
 ```{r}
 gen_data_smoothed |> filter(generation_source %in% c(
@@ -118,7 +143,9 @@ gen_data_smoothed |> filter(generation_source %in% c(
                    .smooth_period = "3 months")
 ```
 
-Looking at all generation sources together on an area chart
+#### Looking at all generation sources together on an area chart
+
+##### Long-term trends
 
 ```{r}
 long_gen_data |> 
@@ -131,13 +158,17 @@ long_gen_data |>
 ```
 
 
-Looking at the daily variation of each generation source
-
 ```{r}
 long_gen_data$year <- year(long_gen_data$time)
 long_gen_data$month <- month(long_gen_data$time)
 long_gen_data$day <- day(long_gen_data$time)
 long_gen_data$hour <- hour(long_gen_data$time)
+```
+
+
+##### Seasonality within a day 
+
+```{r}
 
 hourly_generation_plot_by_year <- long_gen_data %>%
   ggplot(aes(x = hour, y = value, fill = generation_source)) +
@@ -145,6 +176,8 @@ hourly_generation_plot_by_year <- long_gen_data %>%
 
 hourly_generation_plot_by_year
 ```
+
+##### Seasonality within a month 
 
 ```{r}
 daily_generation_plot_by_year <- long_gen_data %>%
@@ -155,6 +188,8 @@ daily_generation_plot_by_year <- long_gen_data %>%
 daily_generation_plot_by_year
 ```
 
+##### Seasonality within a year 
+
 ```{r}
 monthly_generation_plot <- long_gen_data %>%
   ggplot(aes(x = month, y = value, fill = generation_source)) +
@@ -164,10 +199,7 @@ monthly_generation_plot <- long_gen_data %>%
 monthly_generation_plot
 ```
 
-
-
-
-```{r}
+```{r eval=FALSE, include=FALSE}
 price_vs_forecast <- df_clean %>%
   select(., c(time, price.actual, price.day.ahead)) 
 
@@ -179,8 +211,7 @@ price_vs_forecast %>%
   geom_line(aes(x=time, y=difference))
 ```
 
-
-```{r}
+```{r eval=FALSE, include=FALSE}
 load_vs_forecast <- df_clean %>%
   select(., c(time, total.load.actual, total.load.forecast))
 
@@ -191,5 +222,5 @@ load_vs_forecast %>%
   ggplot() +
   geom_line(aes(x=time, y=difference))
 ```
-```
 
+\`\`\`
