@@ -80,9 +80,7 @@ gen_data$hour <- hour(gen_data$time)
 
 hourly_generation_plot_by_year <- gen_data %>%
   ggplot(aes(x = hour, y = value, fill = type)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~year) +
-  guides(fill = FALSE) 
+  geom_bar(stat = "identity") + theme(legend.position = "none") 
 
 hourly_generation_plot_by_year
 ```
@@ -91,8 +89,7 @@ hourly_generation_plot_by_year
 daily_generation_plot_by_year <- gen_data %>%
   ggplot(aes(x = day, y = value, fill = type)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~year) +
-  guides(fill = FALSE) 
+  facet_wrap(~year) + theme(legend.position = "none") 
 
 daily_generation_plot_by_year
 ```
@@ -101,8 +98,7 @@ daily_generation_plot_by_year
 monthly_generation_plot <- gen_data %>%
   ggplot(aes(x = month, y = value, fill = type)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~year) +
-  guides(fill = FALSE) 
+  facet_wrap(~year)
 
 monthly_generation_plot
 ```
