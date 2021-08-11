@@ -1,11 +1,9 @@
 ---
-title: "EDA"
+title: "EDA of electricity time series"
 output: html_notebook
 ---
 
-
-
-```{r libraries, message=FALSE, warning=FALSE,error=FALSE}
+```{r libraries, message=FALSE, warning=FALSE, error=FALSE}
 # Load libraries
 library(RCurl)
 library(tidyverse)
@@ -13,37 +11,57 @@ library(magrittr)
 library(plotly)
 library(imputeTS)
 library(lubridate)
-urlResponse <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
-df <- read.csv(text=urlResponse)
+```
+
+```{r echo=TRUE}
+# Load data (relative file path) and view contents
+df <- read.csv("../data/energy_dataset.csv")
+head(df)
 ```
 
 ```{r}
-str(df)
-```
-
-## Missingness
-
-There are two columns, generation.hydro.pumped.storage.aggregated and forecast.wind.offshore.eday.ahead, which contain no values. All other columns contain 36 or less missing values.
-```{r}
-colSums(is.na(df))
-```
-After dropping the two empty columns we have 47 incomplete cases. 
-```{r}
-# Drop columns with all NA values
-data <- df %>%
-  select(.,-c(forecast.wind.offshore.eday.ahead,generation.hydro.pumped.storage.aggregated))
-
-# List incomplete cases
-data[!complete.cases(data),]
+dim(df) # Number of rows and columns
 ```
 
 
+```{r}
+summary(df) # Distribution and missingness for each variable
+```
+ 
+
+## Missing data
+
+There are six columns that contain no values (all NAs or zeroes) which are removed here.
 
 ```{r}
+df_v2 <- df |> 
+  select(-c(generation.fossil.coal.derived.gas,
+            generation.fossil.oil.shale,
+            generation.fossil.peat,
+            generation.geothermal,
+            generation.marine,
+            generation.hydro.pumped.storage.aggregated,
+            generation.wind.offshore,
+            forecast.wind.offshore.eday.ahead))
+```
+
+
+```{r}
+colSums(is.na(df_v2)) # Number of missing values for each remaining variable
+```
+16 out of 21 of the remaining variables each have a maximum of 36 missing values. Looking at where these occur, we see that most missing values occur across variables. Specifically, 90% of the missing values are of these occur over only 18 rows. The remaining 10% are spread across 28 rows.
+
+```{r}
+# Rows where data is missing
+df_v2[!complete.cases(df_v2),]
+
 # Number of NAs per row
-rowSums(is.na(data[!complete.cases(data),]))
+missing_per_row <- rowSums(is.na(df_v2[!complete.cases(df_v2),]))
+missing_per_row
+sum(missing_per_row > 1)
+sum(missing_per_row[missing_per_row > 1])/sum(missing_per_row)
 ```
-
+## Plotting
 
 ```{r}
 # Formatting
