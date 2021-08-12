@@ -199,7 +199,7 @@ monthly_generation_plot <- long_gen_data %>%
 monthly_generation_plot
 ```
 
-```{r}
+```{r, include=FALSE}
 price_vs_forecast <- df_clean %>%
   select(., c(time, price.actual, price.day.ahead)) 
 
@@ -212,7 +212,7 @@ price_vs_forecast %>%
   ylab("Difference between predicted and actual price")
 ```
 
-```{r}
+```{r, include=FALSE}
 load_vs_forecast <- df_clean %>%
   select(., c(time, total.load.actual, total.load.forecast))
 
