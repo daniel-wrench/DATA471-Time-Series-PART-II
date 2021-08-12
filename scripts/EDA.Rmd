@@ -42,7 +42,7 @@ summary(df) # Distribution and missingness for each variable
 There are eight columns that contain no values (all NAs or zeroes). These are removed here.
 
 ```{r}
-df_clean <- df |> 
+df_clean <- df %>% 
   select(-c(generation.fossil.coal.derived.gas,
             generation.fossil.oil.shale,
             generation.fossil.peat,
@@ -103,14 +103,14 @@ head(df_clean)
 ### Focusing on generation variables
 
 ```{r}
-gen_data <- df_clean |> 
+gen_data <- df_clean %>% 
   select(c(1, starts_with("generation")))
 ```
 
 ```{r}
 # Converting to long form
-long_gen_data <- gen_data  |> 
-  pivot_longer(cols = -time, names_to = "generation_source") |> 
+long_gen_data <- gen_data  %>% 
+  pivot_longer(cols = -time, names_to = "generation_source") %>% 
   mutate(generation_source = str_replace(generation_source, "generation.", ""))
 
 head(long_gen_data)
@@ -127,8 +127,8 @@ ggplot_na_distribution(x=long_gen_data_small$value, y=long_gen_data_small$time)
 Smoothing the data on a daily scale
 
 ```{r}
-gen_data_smoothed <- long_gen_data |> 
-  group_by(generation_source) |> 
+gen_data_smoothed <- long_gen_data %>% 
+  group_by(generation_source) %>% 
   summarise_by_time(time, .by = 'day', adjusted = mean(value)) 
 
 head(gen_data_smoothed)
@@ -137,8 +137,8 @@ head(gen_data_smoothed)
 Looking at four series over time in isolation, with quarterly smoothing (This function is nice as it includes an interactive feature)
 
 ```{r}
-gen_data_smoothed |> filter(generation_source %in% c(
-  "biomass", "fossil.gas", "nuclear", "solar")) |> 
+gen_data_smoothed %>% filter(generation_source %in% c(
+  "biomass", "fossil.gas", "nuclear", "solar")) %>% 
   plot_time_series(time, adjusted, .facet_ncol = 2,
                    .smooth_period = "3 months")
 ```
@@ -148,9 +148,9 @@ gen_data_smoothed |> filter(generation_source %in% c(
 ##### Long-term trends
 
 ```{r}
-long_gen_data |> 
-  group_by(generation_source) |> 
-  summarise_by_time(time, .by = '2 months', adjusted = mean(value)) |> 
+long_gen_data %>% 
+  group_by(generation_source) %>% 
+  summarise_by_time(time, .by = '2 months', adjusted = mean(value)) %>% 
   ggplot() +
   geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity") + 
   #geom_line(data = df_clean, aes(x = time, y = total.load.actual)) +
@@ -199,28 +199,29 @@ monthly_generation_plot <- long_gen_data %>%
 monthly_generation_plot
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 price_vs_forecast <- df_clean %>%
   select(., c(time, price.actual, price.day.ahead)) 
 
-price_vs_forecast$time <- ymd(price_vs_forecast$time)
+## Need to offset by a day before taking difference?
 price_vs_forecast$difference <- price_vs_forecast$price.day.ahead - price_vs_forecast$price.actual
 
 price_vs_forecast %>%
   ggplot() +
-  geom_line(aes(x=time, y=difference))
+  geom_line(aes(x=time, y=difference)) +
+  ylab("Difference between predicted and actual price")
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 load_vs_forecast <- df_clean %>%
   select(., c(time, total.load.actual, total.load.forecast))
 
-load_vs_forecast$time <- ymd(load_vs_forecast$time)
 load_vs_forecast$difference <- load_vs_forecast$total.load.forecast - load_vs_forecast$total.load.actual
 
 load_vs_forecast %>%
   ggplot() +
-  geom_line(aes(x=time, y=difference))
+  geom_line(aes(x=time, y=difference)) +
+  ylab("Difference between predicted and actual load")
 ```
 
 \`\`\`
