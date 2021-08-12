@@ -74,10 +74,6 @@ sum(missing_per_row[missing_per_row > 1])/sum(missing_per_row)
 
 What are we left with?
 
-```{r}
-tail(df_clean)
-```
-
 35,000 obs across 20 variables, hourly from start 2015 to end 2018:
 
 -   Energy generation from 14 different sources
@@ -89,6 +85,7 @@ tail(df_clean)
 -   Forecast and actual electricity price
 
 And in the other dataset, not yet loaded: hourly weather data over the same period for a number of Spanish cities
+
 
 ## Plotting
 
@@ -124,6 +121,35 @@ long_gen_data_small <- long_gen_data[1:10000,]
 ggplot_na_distribution(x=long_gen_data_small$value, y=long_gen_data_small$time)
 ```
 
+Getting statistics over entire dataset for each source
+
+```{r}
+overall_stats <- long_gen_data %>%
+  group_by(generation_source) %>%
+  summarise(sum = sum(value, na.rm = TRUE),
+            mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            max = max(value, na.rm = TRUE)) %>%
+  mutate(generation_source= fct_reorder(generation_source, desc(sum)))
+
+sources_by_sum <- arrange(overall_stats, desc(sum))
+sources_by_sum
+
+ggplot(data = overall_stats) + geom_col(aes(x = generation_source, y = sum)) + theme(axis.text.x = element_text(angle=90))
+
+sources_by_sum %>% pivot_longer(cols = c(sum, mean, sd, max), names_to = "stat", 
+                                values_to = "value") %>%
+  filter(stat != "sum") %>%
+  ggplot() + geom_col(aes(x = generation_source, y = value, fill = stat), position = "dodge") + theme(axis.text.x = element_text(angle=90))
+```
+
+Using this information to re-factor the generation_source variable, so that plots will order the sources from biggest to smallest
+
+```{r}
+long_gen_data$generation_source <- factor(long_gen_data$generation_source, levels =  sources_by_sum$generation_source)
+```
+
+
 Smoothing the data on a daily scale
 
 ```{r}
@@ -137,10 +163,11 @@ head(gen_data_smoothed)
 Looking at four series over time in isolation, with quarterly smoothing (This function is nice as it includes an interactive feature)
 
 ```{r}
-gen_data_smoothed %>% filter(generation_source %in% c(
-  "biomass", "fossil.gas", "nuclear", "solar")) %>% 
-  plot_time_series(time, adjusted, .facet_ncol = 2,
-                   .smooth_period = "3 months")
+gen_data_smoothed %>% 
+  filter(generation_source %in% sources_by_sum$generation_source[1:6]) %>% 
+  plot_time_series(time, adjusted, .facet_ncol = 3,
+                   .smooth_period = "3 months",
+                   .title= "Top generation sources over time, with 3-month mean smoothing")
 ```
 
 #### Looking at all generation sources together on an area chart
@@ -150,11 +177,9 @@ gen_data_smoothed %>% filter(generation_source %in% c(
 ```{r}
 long_gen_data %>% 
   group_by(generation_source) %>% 
-  summarise_by_time(time, .by = '2 months', adjusted = mean(value)) %>% 
-  ggplot() +
-  geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity") + 
-  #geom_line(data = df_clean, aes(x = time, y = total.load.actual)) +
-  theme_minimal()
+  summarise_by_time(time, .by = '3 months', adjusted = mean(value)) %>% 
+  ggplot() + 
+  geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity")
 ```
 
 
