@@ -121,6 +121,17 @@ long_gen_data_small <- long_gen_data[1:10000,]
 ggplot_na_distribution(x=long_gen_data_small$value, y=long_gen_data_small$time)
 ```
 
+
+```{r}
+# Interpolate missing values
+long_gen_data <- df_clean %>% mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear')) %>% 
+  select(c(1, starts_with("generation")))  %>% 
+  pivot_longer(cols = -time, names_to = "generation_source") %>% 
+  mutate(generation_source = str_replace(generation_source, "generation.", ""))
+
+# Verify
+long_gen_data[!complete.cases(long_gen_data),]
+```
 Getting statistics over entire dataset for each source
 
 ```{r}
