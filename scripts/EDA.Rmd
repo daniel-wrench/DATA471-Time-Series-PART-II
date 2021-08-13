@@ -20,6 +20,7 @@ library(plotly)
 library(imputeTS)
 library(lubridate)
 library(timetk)
+library(ggcorrplot)
 ```
 
 ```{r echo=TRUE}
@@ -124,8 +125,9 @@ ggplot_na_distribution(x=long_gen_data_small$value, y=long_gen_data_small$time)
 
 ```{r}
 # Interpolate missing values
-long_gen_data <- df_clean %>% mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear')) %>% 
-  select(c(1, starts_with("generation")))  %>% 
+df_clean %<>% mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear')) %>% 
+  select(c(1, starts_with("generation")))  
+long_gen_data <- df_clean %>% 
   pivot_longer(cols = -time, names_to = "generation_source") %>% 
   mutate(generation_source = str_replace(generation_source, "generation.", ""))
 
@@ -191,6 +193,32 @@ long_gen_data %>%
   summarise_by_time(time, .by = '3 months', adjusted = mean(value)) %>% 
   ggplot() + 
   geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity")
+```
+```{r}
+# Correlation plot. Sample size for computational efficiency.
+df_corr <- df_clean[1:10000,] %>%
+  select(starts_with("generation")) 
+
+names(df_corr) <- c("Biomass",
+                    "Lignite",
+                    "Gas",
+                    "Hard Coal",
+                    "Oil",
+                    "Hydro Pumped",
+                    "Hydro River",
+                    "Hydro Reservoir",
+                    "Nuclear",
+                    "Other",
+                    "Other Renewable",
+                    "Solar",
+                    "Waste",
+                    "Wind Onshore")
+
+df_corr %>% cor() %>%
+  ggcorrplot(.,
+            hc.order = TRUE,
+            type = "lower",
+            lab = FALSE)
 ```
 
 
