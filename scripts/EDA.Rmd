@@ -195,6 +195,24 @@ long_gen_data %>%
   geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity")
 ```
 ```{r}
+# Proportions
+df_props <- cbind(df_clean[1], prop.table(as.matrix(df_clean[-1]), margin = 1))
+
+long_gen_data_props <- df_props %>% 
+  pivot_longer(cols = -time, names_to = "generation_source") %>% 
+  mutate(generation_source = str_replace(generation_source, "generation.", ""))
+
+long_gen_data_props %>%
+  group_by(generation_source) %>% 
+  summarise_by_time(time, .by = '3 months', adjusted = mean(value)) %>% 
+  ggplot() + 
+  geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity") +
+  theme_minimal()
+  
+```
+
+
+```{r}
 # Correlation plot. Sample size for computational efficiency.
 df_corr <- df_clean[1:10000,] %>%
   select(starts_with("generation")) 
@@ -223,23 +241,37 @@ df_corr %>% cor() %>%
 
 
 ```{r}
+# Create time variables
 long_gen_data$year <- year(long_gen_data$time)
 long_gen_data$month <- month(long_gen_data$time)
 long_gen_data$day <- day(long_gen_data$time)
 long_gen_data$hour <- hour(long_gen_data$time)
+
+long_gen_data_props$year <- year(long_gen_data$time)
+long_gen_data_props$month <- month(long_gen_data$time)
+long_gen_data_props$day <- day(long_gen_data$time)
+long_gen_data_props$hour <- hour(long_gen_data$time)
 ```
 
 
 ##### Seasonality within a day 
 
 ```{r}
-
 hourly_generation_plot_by_year <- long_gen_data %>%
   ggplot(aes(x = hour, y = value, fill = generation_source)) +
   geom_bar(stat = "identity")
 
 hourly_generation_plot_by_year
 ```
+```{r}
+# Proportions
+hourly_generation_plot_by_year_props <- long_gen_data_props %>%
+  ggplot(aes(x = hour, y = value, fill = generation_source)) +
+  geom_bar(stat = "identity")
+
+hourly_generation_plot_by_year_props
+```
+
 
 ##### Seasonality within a month 
 
@@ -251,6 +283,15 @@ daily_generation_plot_by_year <- long_gen_data %>%
 
 daily_generation_plot_by_year
 ```
+```{r}
+# Note: Similar problem to raw values
+daily_generation_plot_by_year_props <- long_gen_data_props %>%
+  ggplot(aes(x = day, y = value, fill = generation_source)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) + theme(legend.position = "none") 
+
+daily_generation_plot_by_year_props
+```
 
 ##### Seasonality within a year 
 
@@ -261,6 +302,15 @@ monthly_generation_plot <- long_gen_data %>%
   facet_wrap(~year)
 
 monthly_generation_plot
+```
+```{r}
+# Note: Shorter bars for shorter months as above
+monthly_generation_plot_props <- long_gen_data_props %>%
+  ggplot(aes(x = month, y = value, fill = generation_source)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year)
+
+monthly_generation_plot_props
 ```
 
 ```{r eval=FALSE, include=FALSE}
