@@ -7,9 +7,10 @@ output:
 
 #### Next steps
 
--   Investigate seasonality and long-term trends for each variable
-
--   
+-   Comment on correlations. Perhaps plot together any pairs of variables that are particularly highly correlated or anti-correlated as examples
+-   Comment on any long-term trends
+-   Investigate seasonality
+-   Improve plotting of interpolated regions
 
 ```{r libraries, message=FALSE, warning=FALSE, error=FALSE}
 # Load libraries
@@ -43,7 +44,7 @@ summary(df) # Distribution and missingness for each variable
 There are eight columns that contain no values (all NAs or zeroes). These are removed here.
 
 ```{r}
-df_clean <- df %>% 
+df <- df %>% 
   select(-c(generation.fossil.coal.derived.gas,
             generation.fossil.oil.shale,
             generation.fossil.peat,
@@ -55,25 +56,49 @@ df_clean <- df %>%
 ```
 
 ```{r}
-colSums(is.na(df_clean)) # Number of missing values for each remaining variable
+colSums(is.na(df)) # Number of missing values for each remaining variable
 ```
 
 16 out of 22 of the remaining variables each have a maximum of 36 missing values. Looking at where these occur, we see that most missing values occur across variables. Specifically, 90% of the missing values occur over only 18 rows. The remaining 10% are spread across 28 rows.
 
 ```{r}
 # Rows where data is missing
-df_clean[!complete.cases(df_clean),]
+df[!complete.cases(df),]
 ```
 
 ```{r}
 # Number of NAs per row
-missing_per_row <- rowSums(is.na(df_clean[!complete.cases(df_clean),]))
+missing_per_row <- rowSums(is.na(df[!complete.cases(df),]))
 missing_per_row
 sum(missing_per_row > 1)
 sum(missing_per_row[missing_per_row > 1])/sum(missing_per_row)
 ```
 
-What are we left with?
+We can visualise where in the series the missing values occur using the following function:
+
+```{r}
+ggplot_na_distribution(df$generation.biomass)
+```
+
+However, this only allows us to look at one variable at a time. There are other functions in the imputeTS package which can be useful for investigating missingness in a (univariate) time series.
+
+We have decided to interpolate the missing values using linear interpolation. The only places where this might be an issue is where are two gaps of length 6 and 8. These will be visualised below.
+
+```{r}
+# Interpolate missing values using linear interpolation
+df_clean <- df %>% mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear'))
+
+# Verifying missing values have been filled
+df_clean[!complete.cases(df_clean),]
+```
+
+Plotting larger gaps where interpolation has occurred.
+
+```{r}
+plot(df_clean$generation.biomass[100:120], type = 'l')
+```
+
+What are we left with in df_clean?
 
 35,000 obs across 20 variables, hourly from start 2015 to end 2018:
 
@@ -87,9 +112,6 @@ What are we left with?
 
 And in the other dataset, not yet loaded: hourly weather data over the same period for a number of Spanish cities
 
-
-## Plotting
-
 ```{r}
 # Formatting time variable to datetime object
 # NB:  Time contains both UTC+1 and UTC+2 time-zones - date functions automatically pick this up and convert to UTC
@@ -98,42 +120,38 @@ df_clean$time <- as_datetime(df_clean$time)
 head(df_clean)
 ```
 
-### Focusing on generation variables
+### Focusing on generation
 
 ```{r}
 gen_data <- df_clean %>% 
   select(c(1, starts_with("generation")))
+
+# Giving vars simpler names
+names(gen_data) <- c("time",
+                     "Biomass",
+                    "Lignite",
+                    "Gas",
+                    "Hard Coal",
+                    "Oil",
+                    "Hydro Pumped",
+                    "Hydro River",
+                    "Hydro Reservoir",
+                    "Nuclear",
+                    "Other",
+                    "Other Renewable",
+                    "Solar",
+                    "Waste",
+                    "Wind Onshore")
 ```
 
 ```{r}
 # Converting to long form
 long_gen_data <- gen_data  %>% 
-  pivot_longer(cols = -time, names_to = "generation_source") %>% 
-  mutate(generation_source = str_replace(generation_source, "generation.", ""))
+  pivot_longer(cols = -time, names_to = "generation_source")
 
 head(long_gen_data)
 ```
 
-Plot distribution of (generation) data missingness
-
-```{r}
-# NB: MAYBE DON'T DO WHOLE DATASET LOCALLY, IT CRASHED MY R SESSION
-long_gen_data_small <- long_gen_data[1:10000,]
-ggplot_na_distribution(x=long_gen_data_small$value, y=long_gen_data_small$time)
-```
-
-
-```{r}
-# Interpolate missing values
-df_clean %<>% mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear')) %>% 
-  select(c(1, starts_with("generation")))  
-long_gen_data <- df_clean %>% 
-  pivot_longer(cols = -time, names_to = "generation_source") %>% 
-  mutate(generation_source = str_replace(generation_source, "generation.", ""))
-
-# Verify
-long_gen_data[!complete.cases(long_gen_data),]
-```
 Getting statistics over entire dataset for each source
 
 ```{r}
@@ -162,7 +180,6 @@ Using this information to re-factor the generation_source variable, so that plot
 long_gen_data$generation_source <- factor(long_gen_data$generation_source, levels =  sources_by_sum$generation_source)
 ```
 
-
 Smoothing the data on a daily scale
 
 ```{r}
@@ -183,8 +200,6 @@ gen_data_smoothed %>%
                    .title= "Top generation sources over time, with 3-month mean smoothing")
 ```
 
-#### Looking at all generation sources together on an area chart
-
 ##### Long-term trends
 
 ```{r}
@@ -194,6 +209,7 @@ long_gen_data %>%
   ggplot() + 
   geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity")
 ```
+
 ```{r}
 # Proportions
 df_props <- cbind(df_clean[1], prop.table(as.matrix(df_clean[-1]), margin = 1))
@@ -211,26 +227,9 @@ long_gen_data_props %>%
   
 ```
 
-
 ```{r}
 # Correlation plot. Sample size for computational efficiency.
-df_corr <- df_clean[1:10000,] %>%
-  select(starts_with("generation")) 
-
-names(df_corr) <- c("Biomass",
-                    "Lignite",
-                    "Gas",
-                    "Hard Coal",
-                    "Oil",
-                    "Hydro Pumped",
-                    "Hydro River",
-                    "Hydro Reservoir",
-                    "Nuclear",
-                    "Other",
-                    "Other Renewable",
-                    "Solar",
-                    "Waste",
-                    "Wind Onshore")
+df_corr <- gen_data[1:10000,2:ncol(gen_data)]
 
 df_corr %>% cor() %>%
   ggcorrplot(.,
@@ -239,7 +238,6 @@ df_corr %>% cor() %>%
             lab = FALSE)
 ```
 
-
 ```{r}
 # Create time variables
 long_gen_data$year <- year(long_gen_data$time)
@@ -247,14 +245,13 @@ long_gen_data$month <- month(long_gen_data$time)
 long_gen_data$day <- day(long_gen_data$time)
 long_gen_data$hour <- hour(long_gen_data$time)
 
-long_gen_data_props$year <- year(long_gen_data$time)
-long_gen_data_props$month <- month(long_gen_data$time)
-long_gen_data_props$day <- day(long_gen_data$time)
-long_gen_data_props$hour <- hour(long_gen_data$time)
+long_gen_data_props$year <- year(long_gen_data_props$time)
+long_gen_data_props$month <- month(long_gen_data_props$time)
+long_gen_data_props$day <- day(long_gen_data_props$time)
+long_gen_data_props$hour <- hour(long_gen_data_props$time)
 ```
 
-
-##### Seasonality within a day 
+Seasonality within a day
 
 ```{r}
 hourly_generation_plot_by_year <- long_gen_data %>%
@@ -263,6 +260,7 @@ hourly_generation_plot_by_year <- long_gen_data %>%
 
 hourly_generation_plot_by_year
 ```
+
 ```{r}
 # Proportions
 hourly_generation_plot_by_year_props <- long_gen_data_props %>%
@@ -272,8 +270,7 @@ hourly_generation_plot_by_year_props <- long_gen_data_props %>%
 hourly_generation_plot_by_year_props
 ```
 
-
-##### Seasonality within a month 
+Seasonality within a month
 
 ```{r}
 daily_generation_plot_by_year <- long_gen_data %>%
@@ -283,6 +280,7 @@ daily_generation_plot_by_year <- long_gen_data %>%
 
 daily_generation_plot_by_year
 ```
+
 ```{r}
 # Note: Similar problem to raw values
 daily_generation_plot_by_year_props <- long_gen_data_props %>%
@@ -293,7 +291,7 @@ daily_generation_plot_by_year_props <- long_gen_data_props %>%
 daily_generation_plot_by_year_props
 ```
 
-##### Seasonality within a year 
+Seasonality within a year
 
 ```{r}
 monthly_generation_plot <- long_gen_data %>%
@@ -303,6 +301,7 @@ monthly_generation_plot <- long_gen_data %>%
 
 monthly_generation_plot
 ```
+
 ```{r}
 # Note: Shorter bars for shorter months as above
 monthly_generation_plot_props <- long_gen_data_props %>%
@@ -337,5 +336,3 @@ load_vs_forecast %>%
   geom_line(aes(x=time, y=difference)) +
   ylab("Difference between predicted and actual load")
 ```
-
-\`\`\`
