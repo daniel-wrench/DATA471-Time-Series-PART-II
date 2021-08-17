@@ -16,7 +16,7 @@ output:
 # Load libraries
 library(RCurl)
 library(tidyverse)
-library(magrittr)R
+library(magrittr)
 library(plotly)
 library(imputeTS)
 library(lubridate)
@@ -176,6 +176,8 @@ sources_by_sum %>% pivot_longer(cols = c(sum, mean, sd, max), names_to = "stat",
   ggplot() + geom_col(aes(x = generation_source, y = value, fill = stat), position = "dodge") + theme(axis.text.x = element_text(angle=90)) + labs(title = "Other overall hourly statistics of each source")
 ```
 
+These plots show that nuclear generation has produced the most electricity over the time series, and has the highest mean hourly value. Nuclear is also a very steady generation method, having the smallest standard deviation out of the top six generation sources. Gas has the second highest total and mean generation, and the highest maximum value in an hour. Wind onshore, the third largest contributor, is the most variable generation source, and has the second highest maximum hourly value.
+
 Using this information to re-factor the generation_source variable, so that plots will order the sources from most to least important.
 
 ```{r}
@@ -208,7 +210,11 @@ gen_data_smoothed %>%
                    .title= "Seven smallest generation sources by day, with 3-month smoothing")
 ```
 
-##### Long-term trends
+These plots emphasise the relatively steady day-to-day electricity generation from nuclear over the time period, compared with the high variability in wind onshore (note the different y-axes). Solar shows a strong seasonal pattern within each year, peaking in July (summer) and reaching a low in December (winter) each year. Hydro River appears to show a similar, but less regular, seasonality. 
+
+In terms of long-term trends, biomass, oil, and "other" all show a similar decrease in production at the start of 2016, followed by a steady period until the end of the series. Meanwhile, Waste and Other Renewable show a similar increasing trend over the four year period. Gas increases slightly, whereas Hard Coal and Hydro Reservoir decrease slightly. Nuclear, Wind Onshore, Solar, Hydro River, Hydro Pumped, and Lignite are steady.
+
+##### Stacked area plots
 
 ```{r}
 long_gen_data %>% 
@@ -237,16 +243,28 @@ long_gen_data_props %>%
   
 ```
 
+##### Correlations
+
 ```{r}
 # Correlation plot. Sample size for computational efficiency.
 df_corr <- gen_data[1:10000,2:ncol(gen_data)]
 
-df_corr %>% cor() %>%
-  ggcorrplot(.,
+corrmatrix <- df_corr %>% cor() 
+
+ggcorrplot(corrmatrix,
             hc.order = TRUE,
             type = "lower",
             lab = FALSE)
+
+
+# Extract individual correlations using the following:
+corrmatrix['Hard Coal', 'Hydro Pumped']
+corrmatrix['Hard Coal', 'Wind Onshore']
+corrmatrix['Hard Coal', 'Lignite']
+corrmatrix['Hydro River', 'Hydro Reservoir']
 ```
+The most positive correlation is between Hard Coal and Lignite (0.83), followed by Hydro River and Hydro Reservoir (0.65). This makes sense given the similarity of these sources. The most negative correlation is between Hard Coal and Wind Onshore (-0.58), followed by Hard Coal and Hydro Pumped (-0.54). These relationships could reflect the variability in the generation by the renewable sources (Wind and Hydro, see figures ...), and the need to compensate with fossil fuels when generation is low.
+
 
 ```{r}
 # Create time variables
