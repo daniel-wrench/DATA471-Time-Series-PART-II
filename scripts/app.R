@@ -48,7 +48,7 @@ ui <- dashboardPage(
             "input.vis_select == 'Side-by-side'",
             selectInput("y_scale_select", "Y Scale",
                         c("Shared",
-                          "Indepedent"
+                          "Independent"
                         ))),
             selectInput("time_period_select", "Smoothing Time Interval",
                         c("Hour" = "hour",
@@ -73,8 +73,7 @@ server <- function(input, output) {
   
     # Read in and transform dataset
     df_long <- reactive({
-      response <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
-      data <- read.csv(text = response, header = TRUE) %>%
+      data <- read.csv("data/energy_dataset.csv") %>%
           select(-c(generation.fossil.coal.derived.gas,
                     generation.fossil.oil.shale,
                     generation.fossil.peat,
