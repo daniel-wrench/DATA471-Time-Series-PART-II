@@ -24,7 +24,7 @@ library(ggcorrplot)
 ```
 
 ```{r echo=TRUE}
-# Load data (relative file path) and view contents
+# Load data (relative file path)
 df <- read.csv("../data/energy_dataset.csv")
 
 # Formatting time variable to datetime object

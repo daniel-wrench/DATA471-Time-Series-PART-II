@@ -1,3 +1,13 @@
+######################################################################
+### Shiny app to provide interactive EDA of electricity generation ###
+######################################################################
+
+# ISSUES/FURTHER DEVELOPMENT
+#
+# Test fixing version with and without lines 178-179 to see which is easier
+# In sidebar, group renewables and non-renewables under separate headings?
+
+######################################################################
 
 # Load libraries
 library(shiny)
@@ -48,7 +58,7 @@ ui <- dashboardPage(
             "input.vis_select == 'Side-by-side'",
             selectInput("y_scale_select", "Y Scale",
                         c("Shared",
-                          "Indepedent"
+                          "Independent"
                         ))),
             selectInput("time_period_select", "Smoothing Time Interval",
                         c("Hour" = "hour",
@@ -73,8 +83,17 @@ server <- function(input, output) {
   
     # Read in and transform dataset
     df_long <- reactive({
-      response <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
-      data <- read.csv(text = response, header = TRUE) %>%
+      
+      # Reading from repo URL (this doesn't work for me) 
+      #response <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
+      #data <- read.csv(text = response, header = TRUE) %>%
+      
+      # Bypassing RCurl function (this is much slower for me)
+      #data <- read.csv(url("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")) %>%
+      
+      # Alternatively, read using relative file path
+      data <- read.csv("../data/energy_dataset.csv") %>%
+        
           select(-c(generation.fossil.coal.derived.gas,
                     generation.fossil.oil.shale,
                     generation.fossil.peat,
@@ -141,8 +160,8 @@ server <- function(input, output) {
         geom_line(aes(x = time, y = adjusted, color = generation_source), stat = "identity", lwd = 1, alpha = 0.8) +
         ggtitle("Power Generation by Method (MW)") +
         ylab("Power Generated") +
-        xlab("\n\nTime") +
-        scale_color_discrete(name = "Generation Method") +
+        xlab("Time") +
+        scale_color_discrete(name = "Generation\nMethod") +
         theme(plot.title = element_text(hjust = 0.5),panel.background = element_rect(fill = 'white', color = 'white')) 
       
       if (input$vis_select == "Overlaid") {
