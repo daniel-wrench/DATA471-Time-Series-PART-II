@@ -7,10 +7,9 @@ output:
 
 #### Next steps
 
--   Comment on correlations. Perhaps plot together any pairs of variables that are particularly highly correlated or anti-correlated as examples
--   Comment on any long-term trends
 -   Investigate seasonality
 -   Improve plotting of interpolated regions
+-   Interactive (Shiny) plots comparing different series?
 
 ```{r libraries, message=FALSE, warning=FALSE, error=FALSE}
 # Load libraries
@@ -143,13 +142,14 @@ names(gen_data) <- c("time",
                     "Other Renewable",
                     "Solar",
                     "Waste",
-                    "Wind Onshore")
+                    "Wind") #Renaming from Wind Onshore as no other wind var
 ```
 
 ```{r}
-# Converting to long form
+# Converting to long form, grouping
 long_gen_data <- gen_data  %>% 
-  pivot_longer(cols = -time, names_to = "generation_source")
+  pivot_longer(cols = -time, names_to = "generation_source") %>%
+  group_by(generation_source)
 
 head(long_gen_data)
 ```
@@ -158,7 +158,6 @@ Getting statistics over entire dataset for each source
 
 ```{r}
 overall_stats <- long_gen_data %>%
-  group_by(generation_source) %>%
   summarise(sum = sum(value, na.rm = TRUE),
             mean = mean(value, na.rm = TRUE),
             sd = sd(value, na.rm = TRUE),
@@ -176,7 +175,7 @@ sources_by_sum %>% pivot_longer(cols = c(sum, mean, sd, max), names_to = "stat",
   ggplot() + geom_col(aes(x = generation_source, y = value, fill = stat), position = "dodge") + theme(axis.text.x = element_text(angle=90)) + labs(title = "Other overall hourly statistics of each source")
 ```
 
-These plots show that nuclear generation has produced the most electricity over the time series, and has the highest mean hourly value. Nuclear is also a very steady generation method, having the smallest standard deviation out of the top six generation sources. Gas has the second highest total and mean generation, and the highest maximum value in an hour. Wind onshore, the third largest contributor, is the most variable generation source, and has the second highest maximum hourly value.
+These plots show that nuclear generation has produced the most electricity over the time series, and has the highest mean hourly value. Nuclear is also a very steady generation method, having the smallest standard deviation out of the top six generation sources. Gas has the second highest total and mean generation, and the highest maximum value in an hour. Wind, the third largest contributor, is the most variable generation source, and has the second highest maximum hourly value.
 
 Using this information to re-factor the generation_source variable, so that plots will order the sources from most to least important.
 
@@ -188,8 +187,7 @@ Smoothing the data on a daily scale
 
 ```{r}
 gen_data_smoothed <- long_gen_data %>% 
-  group_by(generation_source) %>% 
-  summarise_by_time(time, .by = 'day', adjusted = mean(value)) 
+  summarise_by_time(time, .by = 'week', adjusted = mean(value)) 
 
 head(gen_data_smoothed)
 ```
@@ -200,25 +198,24 @@ Looking at each series over time in isolation, with quarterly smoothing (This fu
 gen_data_smoothed %>% 
   filter(generation_source %in% sources_by_sum$generation_source[1:6]) %>% 
   plot_time_series(time, adjusted, .facet_ncol = 3,
-                   .smooth_period = "3 months",
-                   .title= "Six biggest generation sources by day, with 3-month smoothing line")
+                   .smooth_period = "12 months", .facet_scales='fixed',
+                   .title= "Weekly averages for six biggest generation sources + 12-month smoothing")
 
 gen_data_smoothed %>% 
   filter(generation_source %in% sources_by_sum$generation_source[7:14]) %>% 
   plot_time_series(time, adjusted, .facet_ncol = 3,
-                   .smooth_period = "3 months",
-                   .title= "Seven smallest generation sources by day, with 3-month smoothing")
+                   .smooth_period = "12 months", .facet_scales='fixed',
+                   .title= "Weekly averages for six smallest generation sources + 12-month smoothing")
 ```
 
-These plots emphasise the relatively steady day-to-day electricity generation from nuclear over the time period, compared with the high variability in wind onshore (note the different y-axes). Solar shows a strong seasonal pattern within each year, peaking in July (summer) and reaching a low in December (winter) each year. Hydro River appears to show a similar, but less regular, seasonality. 
+These plots emphasise the relatively steady week-to-week electricity generation from nuclear over the time period, compared with the high variability in wind and gas (note that each row has the same y-axis). Solar shows a strong seasonal pattern within each year, peaking in July (summer) and reaching a low in December (winter) each year. All hydro sources appears to show seasonality on a two-year scale. 
 
-In terms of long-term trends, biomass, oil, and "other" all show a similar decrease in production at the start of 2016, followed by a steady period until the end of the series. Meanwhile, Waste and Other Renewable show a similar increasing trend over the four year period. Gas increases slightly, whereas Hard Coal and Hydro Reservoir decrease slightly. Nuclear, Wind Onshore, Solar, Hydro River, Hydro Pumped, and Lignite are steady.
+In terms of long-term trends, biomass, oil, and "other" all show a similar decrease in production at the start of 2016, followed by a steady period until the end of the series. Meanwhile, Waste and Other Renewable show a similar increasing trend over the four year period. Gas increases slightly, whereas Hard Coal decreased slightly. Nuclear, Wind, Solar, Lignite, and all Hydro sources are steady.
 
 ##### Stacked area plots
 
 ```{r}
 long_gen_data %>% 
-  group_by(generation_source) %>% 
   summarise_by_time(time, .by = '3 months', adjusted = mean(value)) %>% 
   ggplot() + 
   geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity")
@@ -249,22 +246,26 @@ long_gen_data_props %>%
 # Correlation plot. Sample size for computational efficiency.
 df_corr <- gen_data[1:10000,2:ncol(gen_data)]
 
-corrmatrix <- df_corr %>% cor() 
-
+corrmatrix <- df_corr %>% cor()
 ggcorrplot(corrmatrix,
             hc.order = TRUE,
             type = "lower",
             lab = FALSE)
 
-
 # Extract individual correlations using the following:
 corrmatrix['Hard Coal', 'Hydro Pumped']
-corrmatrix['Hard Coal', 'Wind Onshore']
+corrmatrix['Hard Coal', 'Wind']
 corrmatrix['Hard Coal', 'Lignite']
 corrmatrix['Hydro River', 'Hydro Reservoir']
 ```
-The most positive correlation is between Hard Coal and Lignite (0.83), followed by Hydro River and Hydro Reservoir (0.65). This makes sense given the similarity of these sources. The most negative correlation is between Hard Coal and Wind Onshore (-0.58), followed by Hard Coal and Hydro Pumped (-0.54). These relationships could reflect the variability in the generation by the renewable sources (Wind and Hydro, see figures ...), and the need to compensate with fossil fuels when generation is low.
+The most positive correlation is between Hard Coal and Lignite (0.83), followed by Hydro River and Hydro Reservoir (0.65). This makes sense given the similarity of these sources. The most negative correlation is between Hard Coal and Wind (-0.58), followed by Hard Coal and Hydro Pumped (-0.54). These relationships could reflect the variability in the generation by the renewable sources (Wind and Hydro, see figures ...), and the need to compensate with fossil fuels when generation is low. These relationships are further examined in the plots below.
 
+
+```{r}
+long_gen_data[1:10000,] %>% filter(generation_source %in% c('Wind', 'Hard Coal','Lignite')) %>% ungroup() %>% plot_time_series(time, value, .color_var = generation_source, .smooth = 0)
+
+long_gen_data[1:10000,] %>% filter(generation_source %in% c('Hydro Reservoir', 'Hydro River')) %>% ungroup() %>% plot_time_series(time, value, .color_var = generation_source, .smooth = 0)
+```
 
 ```{r}
 # Create time variables
