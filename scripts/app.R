@@ -71,6 +71,7 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
   
+    # Read in and transform dataset
     df_long <- reactive({
       response <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
       data <- read.csv(text = response, header = TRUE) %>%
@@ -102,13 +103,16 @@ server <- function(input, output) {
                              "Waste",
                              "Wind Onshore")
         
+        # Change to datetime var
         data$time <- as_datetime(data$time)
         
+        # Subset to user selected dates
         data %<>%
           filter(time >= as_datetime(input$date_select[1])) %>%
           filter(time <= as_datetime(input$date_select[2])) %>%
           pivot_longer(cols = -time, names_to = "generation_source")
 
+        # Subset to selected generation methods
         if(length(input$gen_method_select) > 0) {
             data %<>%
                 dplyr::filter(generation_source %in% input$gen_method_select)
@@ -129,6 +133,7 @@ server <- function(input, output) {
         pad = 4
       )
       
+      # Smooth by user selected time period
       plot1_data <- df_long() %>% group_by(generation_source) %>% 
         summarise_by_time(time, .by = input$time_period_select, adjusted = mean(value))
       
