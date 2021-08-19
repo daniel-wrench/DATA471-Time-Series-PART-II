@@ -83,7 +83,7 @@ server <- function(input, output) {
   
     # Read in and transform dataset
     df_long <- reactive({
-      
+
       # Reading from repo URL (this doesn't work for me) 
       #response <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
       #data <- read.csv(text = response, header = TRUE) %>%
