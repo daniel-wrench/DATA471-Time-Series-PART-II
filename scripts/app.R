@@ -78,7 +78,7 @@ ui <- dashboardPage(
     )
 )
 
-
+data1 <- read.csv(url("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv"))
 server <- function(input, output) {
   
     # Read in and transform dataset
@@ -89,10 +89,10 @@ server <- function(input, output) {
       #data <- read.csv(text = response, header = TRUE) %>%
       
       # Bypassing RCurl function (this is much slower for me)
-      #data <- read.csv(url("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")) %>%
-      
+      #data1 <- read.csv(url("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")) %>%
+      data <- data1 %>%
       # Alternatively, read using relative file path
-      data <- read.csv("../data/energy_dataset.csv") %>%
+      #data <- read.csv("../data/energy_dataset.csv") %>%
         
           select(-c(generation.fossil.coal.derived.gas,
                     generation.fossil.oil.shale,
@@ -142,7 +142,6 @@ server <- function(input, output) {
 
     output$linePlot <- renderPlotly({
         req(df_long())
-      
       # Plotting margins
       m <- list(
         l = 50,
@@ -175,8 +174,8 @@ server <- function(input, output) {
          theme(legend.position="none", axis.text.x = element_text(angle = 45)) +
          facet_wrap(~generation_source, scales = "free_y")
      }
-      ggplotly(plot1) %>%
-        layout(autosize = F, width = 1200, height = 800, margin = m)
+      #ggplotly(plot1) %>%
+      #  layout(autosize = F, width = 1200, height = 800, margin = m)
     })
 
 }

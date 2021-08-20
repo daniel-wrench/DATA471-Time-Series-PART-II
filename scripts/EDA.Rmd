@@ -21,6 +21,7 @@ library(imputeTS)
 library(lubridate)
 library(timetk)
 library(ggcorrplot)
+library(gridExtra)
 ```
 
 ```{r echo=TRUE}
@@ -366,61 +367,71 @@ load_vs_forecast %>%
   ylab("Difference between predicted and actual load")
 
 ```
-### To discuss
-```{r, include=TRUE}
+Looking at variation in maximum and minimum load. 
 
-
-
-
+```{r, include=TRUE, fig.width = 14, fig.height = 36, warning=FALSE, message = FALSE}
 datain <- long_gen_data %>% group_by(generation_source, year, day, month) %>% summarise(across(c(value), c(max, min)))
 
 datain <- datain %>%
   mutate(date = make_date(year, month, day))
-head(datain)
+p <- list()
 names <- unique(datain$generation_source)
-for(name in names){
-  datain2 <- filter(datain, generation_source == name)
-  print(datain2 %>% ggplot()+geom_line(aes(x = date, y = (value_1 - value_2)/((value_1+value_2)/2) , color = generation_source))+theme(legend.position="bottom") + ggtitle(name)
-)
+for(i in 1:length(names)){
+  datain2 <- filter(datain, generation_source == names[i])
+  p[[i]] <- datain2 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+theme(legend.position="bottom")+ggtitle(names[i])+
+  stat_smooth(formula = y ~ x,method = "loess", col = "red",aes(x = date, y = value_1))+
+  stat_smooth(formula = y ~ x, method = "loess", col = "blue",aes(x = date, y = value_2))
+
 }
 
+do.call(grid.arrange,c(p,ncol=2))
+```
+   * mostly parallel suggesting max and minimum load on the grid for each type remains fairly constant despite overall changes in level.
+   * Notable exemptions to this include oil where max has decreased in proportion. Hydro Pumped where max is decreasing, solar where max is decreasing in comparison.
+   * Overall decreasing trends: hard coal, biomass, oil, wind onshore, other, lignite
+   * Overall increasing trends: Gas, waste, other renewable, hydro river
+step changes seen in: 
+   * hard coal, mid 2016 - mid 2017, increase
+   * gas, mid 2016 - mid 2017, increase
+   * Hydro Reservoir, mid 2016 - mid 2017, decrease
+   * Hydro river, mid 2016 - mid 2017, decrease
+   * lignite, mid 2016 - mid 2017, increase
+   * oil, start 2016, drop
+   * other renewable, 2016 start, 2017 start, increase
+   *other, 2016 start decrease
 
+
+Looking at violin plots for max and min:
+
+   * clear preferred modes eg nuclear three defined levels in both
+   * three overall trends - show predominant variation in max / min or equal in both
+
+```{r, include=TRUE, fig.width = 14, fig.height = 36}
+q <- list()
+
+for(i in 1:length(names)){
+  datain2 <- filter(datain, generation_source == names[i])
+  q[[i]] <-  ggplot(datain2 ) + geom_violin(aes(x = 1, y = value_2))+ geom_violin(aes(x = 2, y = value_1)) + geom_boxplot(aes(x = 1, y = value_2), width=0.1)+ geom_boxplot(aes(x = 2, y = value_1), width=0.1)+ggtitle(names[i])}
+
+do.call(grid.arrange,c(q,ncol=2))
 ```
 
-```{r, include=TRUE}
 
 
+```{r, include=TRUE, fig.width = 14, fig.height = 36}
 
 
-datain <- long_gen_data %>% group_by(generation_source, year, day, month) %>% summarise(across(c(value), c(max, min)))
-
-datain <- datain %>%
-  mutate(date = make_date(year, month, day))
-head(datain)
-names <- unique(datain$generation_source)
-for(name in names){
-  datain2 <- filter(datain, generation_source == name)
-  print(datain2 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+theme(legend.position="bottom")+ggtitle(name)
-)
-}
-
-
-```
-```{r, include=TRUE}
-
-
-long_gen_data[is.na(long_gen_data)] <- mean(long_gen_data$value)
-
+#long_gen_data[is.na(long_gen_data)] <- mean(long_gen_data$value)
 
 datain <- long_gen_data %>% group_by(generation_source, year, month) %>% summarise(across(c(value), c(max, min)))
 datain2 <- datain %>%
   mutate(date = make_date(year, month))
 
-head(datain2)
 names <- unique(datain2$generation_source)
-for(name in names){
-  datain3 <- filter(datain2, generation_source == name)
-  print(datain3 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+theme(legend.position="bottom")+ggtitle(name))
+for(i in 1:length(names)){
+  datain3 <- filter(datain2, generation_source == names[i])
+  p[[i]] <- datain3 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+theme(legend.position="bottom")+ggtitle(names[i])
 }
 
+do.call(grid.arrange,c(p,ncol=2))
 ```
