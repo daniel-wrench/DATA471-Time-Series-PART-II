@@ -3,13 +3,16 @@ title: "EDA of Spanish electricity generation time series"
 output:
   html_document:
     df_print: paged
+    toc: true
+    toc_depth: 4
 ---
 
-#### Next steps
+### Next steps
 
 -   Investigate seasonality
 -   Improve plotting of interpolated regions
--   Interactive (Shiny) plots comparing different series?
+
+### Initial import
 
 ```{r libraries, message=FALSE, warning=FALSE, error=FALSE}
 # Load libraries
@@ -43,7 +46,7 @@ dim(df) # Number of rows and columns
 summary(df) # Distribution and missingness for each variable
 ```
 
-## Missing data
+### Missing data
 
 There are eight columns that contain no values (all NAs or zeroes). These are removed here.
 
@@ -105,7 +108,6 @@ df_clean$interp_biomass <- as.integer(is.na(df$generation.biomass))
 ggplot(data = df_clean[90:150,]) + geom_line(aes(x=time, y = generation.biomass, colour = interp_biomass), show.legend = FALSE) + scale_color_gradient(low="black", high="red") + labs(title = "Example of linear interpolation (in red) applied to the dataset")
 ```
 
-
 **What are we left with in df_clean?**
 
 35,000 obs across 20 variables, hourly from start 2015 to end 2018:
@@ -120,9 +122,7 @@ ggplot(data = df_clean[90:150,]) + geom_line(aes(x=time, y = generation.biomass,
 
 And in the other dataset, not yet loaded: hourly weather data over the same period for a number of Spanish cities
 
-
-
-### Focusing on generation
+### Investigating generation methods
 
 ```{r}
 gen_data <- df_clean %>% 
@@ -155,7 +155,7 @@ long_gen_data <- gen_data  %>%
 head(long_gen_data)
 ```
 
-Getting statistics over entire dataset for each source
+#### Overall statistics
 
 ```{r}
 overall_stats <- long_gen_data %>%
@@ -193,6 +193,8 @@ gen_data_smoothed <- long_gen_data %>%
 head(gen_data_smoothed)
 ```
 
+#### Individual time series plots
+
 Looking at each series over time in isolation, with quarterly smoothing (This function is nice as it includes an interactive feature)
 
 ```{r}
@@ -209,11 +211,11 @@ gen_data_smoothed %>%
                    .title= "Weekly averages for six smallest generation sources + 12-month smoothing")
 ```
 
-These plots emphasise the relatively steady week-to-week electricity generation from nuclear over the time period, compared with the high variability in wind and gas (note that each row has the same y-axis). Solar shows a strong seasonal pattern within each year, peaking in July (summer) and reaching a low in December (winter) each year. All hydro sources appears to show seasonality on a two-year scale. 
+These plots emphasise the relatively steady week-to-week electricity generation from nuclear over the time period, compared with the high variability in wind and gas (note that each row has the same y-axis). Solar shows a strong seasonal pattern within each year, peaking in July (summer) and reaching a low in December (winter) each year. All hydro sources appears to show seasonality on a two-year scale.
 
 In terms of long-term trends, biomass, oil, and "other" all show a similar decrease in production at the start of 2016, followed by a steady period until the end of the series. Meanwhile, Waste and Other Renewable show a similar increasing trend over the four year period. Gas increases slightly, whereas Hard Coal decreased slightly. Nuclear, Wind, Solar, Lignite, and all Hydro sources are steady.
 
-##### Stacked area plots
+#### Stacked area plots
 
 ```{r}
 long_gen_data %>% 
@@ -241,7 +243,7 @@ long_gen_data_props %>%
   
 ```
 
-##### Correlations
+#### Correlations
 
 ```{r}
 # Correlation plot. Sample size for computational efficiency.
@@ -259,14 +261,16 @@ corrmatrix['Hard Coal', 'Wind']
 corrmatrix['Hard Coal', 'Lignite']
 corrmatrix['Hydro River', 'Hydro Reservoir']
 ```
-The most positive correlation is between Hard Coal and Lignite (0.83), followed by Hydro River and Hydro Reservoir (0.65). This makes sense given the similarity of these sources. The most negative correlation is between Hard Coal and Wind (-0.58), followed by Hard Coal and Hydro Pumped (-0.54). These relationships could reflect the variability in the generation by the renewable sources (Wind and Hydro, see figures ...), and the need to compensate with fossil fuels when generation is low. These relationships are further examined in the plots below.
 
+The most positive correlation is between Hard Coal and Lignite (0.83), followed by Hydro River and Hydro Reservoir (0.65). This makes sense given the similarity of these sources. The most negative correlation is between Hard Coal and Wind (-0.58), followed by Hard Coal and Hydro Pumped (-0.54). These relationships could reflect the variability in the generation by the renewable sources (Wind and Hydro, see figures ...), and the need to compensate with fossil fuels when generation is low. These relationships are further examined in the plots below.
 
 ```{r}
 long_gen_data[1:10000,] %>% filter(generation_source %in% c('Wind', 'Hard Coal','Lignite')) %>% ungroup() %>% plot_time_series(time, value, .color_var = generation_source, .smooth = 0)
 
 long_gen_data[1:10000,] %>% filter(generation_source %in% c('Hydro Reservoir', 'Hydro River')) %>% ungroup() %>% plot_time_series(time, value, .color_var = generation_source, .smooth = 0)
 ```
+
+#### Seasonality
 
 ```{r}
 # Create time variables
@@ -367,7 +371,10 @@ load_vs_forecast %>%
   ylab("Difference between predicted and actual load")
 
 ```
-Looking at variation in maximum and minimum load. 
+
+#### Variation in maximum and minimum load
+
+##### Daily averages
 
 ```{r, include=TRUE, fig.width = 14, fig.height = 36, warning=FALSE, message = FALSE}
 datain <- long_gen_data %>% group_by(generation_source, year, day, month) %>% summarise(across(c(value), c(max, min)))
@@ -386,25 +393,20 @@ for(i in 1:length(names)){
 
 do.call(grid.arrange,c(p,ncol=2))
 ```
-   * mostly parallel suggesting max and minimum load on the grid for each type remains fairly constant despite overall changes in level.
-   * Notable exemptions to this include oil where max has decreased in proportion. Hydro Pumped where max is decreasing, solar where max is decreasing in comparison.
-   * Overall decreasing trends: hard coal, biomass, oil, wind onshore, other, lignite
-   * Overall increasing trends: Gas, waste, other renewable, hydro river
-step changes seen in: 
-   * hard coal, mid 2016 - mid 2017, increase
-   * gas, mid 2016 - mid 2017, increase
-   * Hydro Reservoir, mid 2016 - mid 2017, decrease
-   * Hydro river, mid 2016 - mid 2017, decrease
-   * lignite, mid 2016 - mid 2017, increase
-   * oil, start 2016, drop
-   * other renewable, 2016 start, 2017 start, increase
-   *other, 2016 start decrease
 
+-   mostly parallel suggesting max and minimum load on the grid for each type remains fairly constant despite overall changes in level.
+-   Notable exemptions to this include oil where max has decreased in proportion. Hydro Pumped where max is decreasing, solar where max is decreasing in comparison.
+-   Overall decreasing trends: hard coal, biomass, oil, wind onshore, other, lignite
+-   Overall increasing trends: Gas, waste, other renewable, hydro river step changes seen in:
+-   hard coal, mid 2016 - mid 2017, increase
+-   gas, mid 2016 - mid 2017, increase
+-   Hydro Reservoir, mid 2016 - mid 2017, decrease
+-   Hydro river, mid 2016 - mid 2017, decrease
+-   lignite, mid 2016 - mid 2017, increase
+-   oil, start 2016, drop
+-   other renewable, 2016 start, 2017 start, increase \*other, 2016 start decrease
 
-Looking at violin plots for max and min:
-
-   * clear preferred modes eg nuclear three defined levels in both
-   * three overall trends - show predominant variation in max / min or equal in both
+##### Daily average violin plots
 
 ```{r, include=TRUE, fig.width = 14, fig.height = 36}
 q <- list()
@@ -416,7 +418,12 @@ for(i in 1:length(names)){
 do.call(grid.arrange,c(q,ncol=2))
 ```
 
+Looking at violin plots for max and min:
 
+-   clear preferred modes eg nuclear three defined levels in both
+-   three overall trends - show predominant variation in max / min or equal in both
+
+##### Monthly averages
 
 ```{r, include=TRUE, fig.width = 14, fig.height = 36}
 
