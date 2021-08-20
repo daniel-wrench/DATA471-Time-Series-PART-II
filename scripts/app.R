@@ -144,10 +144,10 @@ server <- function(input, output) {
         req(df_long())
       # Plotting margins
       m <- list(
-        l = 50,
+        l = 100,
         r = 50,
         b = 100,
-        t = 100,
+        t = 75,
         pad = 4
       )
       
@@ -167,15 +167,16 @@ server <- function(input, output) {
         plot1 <- plot1
      } else if (input$y_scale_select == "Shared") {
         plot1 <- plot1 +
-         theme(legend.position="none", axis.text.x = element_text(angle = 45)) +
+         theme(legend.position="none") +
          facet_wrap(~generation_source)
      } else {
         plot1 <- plot1 +
-         theme(legend.position="none", axis.text.x = element_text(angle = 45)) +
+         theme(legend.position="none") +
          facet_wrap(~generation_source, scales = "free_y")
      }
-      #ggplotly(plot1) %>%
-      #  layout(autosize = F, width = 1200, height = 800, margin = m)
+      # Adjust output size
+      ggplotly(plot1) %>%
+       layout(autosize = F, width = 1000, height = 800, margin = m)
     })
 
 }
