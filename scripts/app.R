@@ -176,7 +176,7 @@ server <- function(input, output) {
      }
       # Adjust output size
       ggplotly(plot1) %>%
-       layout(autosize = F, width = 1000, height = 800, margin = m)
+       layout(autosize = T, width = NULL, height = 800, margin = m)
     })
 
 }
