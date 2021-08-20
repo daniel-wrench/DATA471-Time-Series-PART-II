@@ -4,7 +4,6 @@
 
 # ISSUES/FURTHER DEVELOPMENT
 #
-# Test fixing version with and without lines 178-179 to see which is easier
 # In sidebar, group renewables and non-renewables under separate headings?
 
 ######################################################################
@@ -29,26 +28,35 @@ ui <- dashboardPage(
 
     # Sidebar with a slider input for number of bins 
     dashboardSidebar(
-          dateRangeInput("date_select", "Select Date Range",
-                         start = "2015-01-01",
-                         end = "2018-12-31",
-                         min = "2015-01-01",
-                         max = "2018-12-31"),
+            selectInput("time_period_select", "Smoothing Time Interval",
+                        c("Hour" = "hour",
+                          "Day" = "day",
+                          "Week" = "week",
+                          "Month" = "month",
+                          "Quarter" = "quarter",
+                          "Half Year" = "halfyear",
+                          "Year" = "year"
+                        ), selected = c("Month"="month")),
+            dateRangeInput("date_select", "Select Date Range",
+                           start = "2015-01-01",
+                           end = "2018-12-31",
+                           min = "2015-01-01",
+                           max = "2018-12-31"),
             checkboxGroupInput("gen_method_select", "Select Generation Methods",
-                        c("Biomass",
+                        c("Hard Coal",
                           "Lignite",
+                          "Biomass",
                           "Gas",
-                          "Hard Coal",
                           "Oil",
+                          "Waste",
+                          "Nuclear",
+                          "Other",
+                          "Solar",
                           "Hydro Pumped",
                           "Hydro River",
                           "Hydro Reservoir",
-                          "Nuclear",
-                          "Other",
-                          "Other Renewable",
-                          "Solar",
-                          "Waste",
-                          "Wind Onshore"
+                          "Wind Onshore",
+                          "Other Renewable"
                          )),
             selectInput("vis_select", "Select Visualisation Method",
                         c("Overlaid",
@@ -59,16 +67,7 @@ ui <- dashboardPage(
             selectInput("y_scale_select", "Y Scale",
                         c("Shared",
                           "Independent"
-                        ))),
-            selectInput("time_period_select", "Smoothing Time Interval",
-                        c("Hour" = "hour",
-                          "Day" = "day",
-                          "Week" = "week",
-                          "Month" = "month",
-                          "Quarter" = "quarter",
-                          "Half Year" = "halfyear",
-                          "Year" = "year"
-                        ), selected = c("Month"="month"))
+                        )))
         ),
         dashboardBody(
           fluidPage(
@@ -176,7 +175,7 @@ server <- function(input, output) {
      }
       # Adjust output size
       ggplotly(plot1) %>%
-       layout(autosize = T, width = NULL, height = 800, margin = m)
+       layout(autosize = T, width = NULL, height = 600, margin = m)
     })
 
 }
