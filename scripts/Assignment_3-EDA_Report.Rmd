@@ -30,6 +30,8 @@ The question we formulated to guide our EDA is as follows:
 
 # Ethics, Privacy, and Security
 
+_Brain dumped at this stage, let me know any areas that need adding in_
+
 Ethics:
 -	Implications if used to inform future energy decisions, e.g., if it shows nuclear to be the best there are some ethical concerns around this. Or if shows that Spain is increasing its carbon-based sources then this inherently has implications.
 
