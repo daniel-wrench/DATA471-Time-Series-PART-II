@@ -8,6 +8,12 @@ output:
     toc_float: True
 ---
 
+Daniel Patterson *insert student ID here*
+
+Rob Tomkies *insert student ID here*
+
+Daniel Wrench 300398222
+
 **Due 5pm Tuesday 31st August**
 
 # Summary

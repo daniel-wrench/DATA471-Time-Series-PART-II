@@ -5,6 +5,7 @@ output:
     df_print: paged
     toc: true
     toc_depth: 4
+    toc_float: TRUE
 ---
 
 ### Next steps
