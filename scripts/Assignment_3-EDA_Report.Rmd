@@ -16,8 +16,6 @@ Daniel Wrench 300398222
 
 **Due 5pm Tuesday 31st August**
 
-# Summary
-
 The report details exploratory data analysis (EDA) of a time series of electricity generation in Spain between 2015 to 2018.
 
 The question we formulated to guide our EDA is as follows:
@@ -28,50 +26,51 @@ The question we formulated to guide our EDA is as follows:
 
 *1-3 pages, 6 marks*
 
+We chose to study a time series dataset about electricity generation in Spain over a three-year period. The original dataset, which we downloaded from the website Kaggle, contained variables for electricity consumption, generation, and pricing, recorded every hour, including day-ahead forecasts. These are recorded from the start of 2015 to the end of 2018. For this exploration of the data, we limited our investigation to hourly electricity generation, which is divided into several different generation methods/sources.
+
+This data is worth exploring due to the pressing global challenge of climate change, and the consequent need for countries to transition to a sustainable energy economy. In order for this to be possible, we need to understand how electricity is currently being generated and what the long-term trends are, to see whether a nation's energy policy should continue to diverge from the current trajectory. Furthermore, governments need to know how electricity generation methods vary seasonally and what interdependencies there are.
+
 # Ethics, Privacy, and Security
 
-_Brain dumped at this stage, let me know any areas that need adding in_
+*Brain dumped at this stage, let me know any areas that need adding in*
 
-Ethics:
--	Implications if used to inform future energy decisions, e.g., if it shows nuclear to be the best there are some ethical concerns around this. Or if shows that Spain is increasing its carbon-based sources then this inherently has implications.
+Ethics: - Implications if used to inform future energy decisions, e.g., if it shows nuclear to be the best there are some ethical concerns around this. Or if shows that Spain is increasing its carbon-based sources then this inherently has implications.
 
--	The generation of energy itself has few ethical concerns however certain religious groups may be anti-technology
+-   The generation of energy itself has few ethical concerns however certain religious groups may be anti-technology
 
--	Again, if used to inform future energy decisions this may have implications on people’s jobs – e.g., coal mines/ports being put out of business.
+-   Again, if used to inform future energy decisions this may have implications on people's jobs -- e.g., coal mines/ports being put out of business.
 
--	As this data is at a national level in summaries there is little about personal ethics that can be considered as this is the generation by source not the utilization and as such the data is not about the people rather the country as a whole. 
+-   As this data is at a national level in summaries there is little about personal ethics that can be considered as this is the generation by source not the utilization and as such the data is not about the people rather the country as a whole.
 
--	There is no intention of modelling cost effectiveness of sources and so the socioeconomic impacts of selecting a more expensive energy source for the environmental friendliness however if these models were used in an argument to this effect there could be concerns. 
+-   There is no intention of modelling cost effectiveness of sources and so the socioeconomic impacts of selecting a more expensive energy source for the environmental friendliness however if these models were used in an argument to this effect there could be concerns.
 
--	If the model includes a global warming factor and predicts that water e.g., would decrease – some Americans may take offence - political.
+-   If the model includes a global warming factor and predicts that water e.g., would decrease -- some Americans may take offence - political.
 
--	Spain has multiple ethnicities however none have governance or stipulations regarding the use of data that relates to them.
+-   Spain has multiple ethnicities however none have governance or stipulations regarding the use of data that relates to them.
 
 Privacy:
 
--	Your right not to be asked invasive questions, or to needlessly provide personal information. The data is collected at source and contains no personal information.
+-   Your right not to be asked invasive questions, or to needlessly provide personal information. The data is collected at source and contains no personal information.
 
--	Privacy is the assurance that any publication which relies on your personal information does not identify you. Again, collected by source so no way that this information is identifiable. This would be more of a concern if data was by region, street or account specified however the public information does not.
+-   Privacy is the assurance that any publication which relies on your personal information does not identify you. Again, collected by source so no way that this information is identifiable. This would be more of a concern if data was by region, street or account specified however the public information does not.
 
--	Data does not contain any form of individual record per person or group of people and as such privacy of individuals is guaranteed – the data is conglomerate to a national scale and is collected at source of generation rather than being the sum total of individual usage.
+-   Data does not contain any form of individual record per person or group of people and as such privacy of individuals is guaranteed -- the data is conglomerate to a national scale and is collected at source of generation rather than being the sum total of individual usage.
 
--	As such approaches like differential privacy are not necessary and would be detrimental if applied. 
+-   As such approaches like differential privacy are not necessary and would be detrimental if applied.
 
--	Data is available publicly from  Spanish TSO Red Electric España and as such no concerns of corporate property breach. 
+-   Data is available publicly from Spanish TSO Red Electric España and as such no concerns of corporate property breach.
 
--	As this data is publicly available and provided by the Spanish national data source it complies with Spanish and European data privacy regulation
+-   As this data is publicly available and provided by the Spanish national data source it complies with Spanish and European data privacy regulation
 
-Security:
--	Three main factors should be considered when trying to keep this project secure – confidentiality, integrity and availability.
+Security: - Three main factors should be considered when trying to keep this project secure -- confidentiality, integrity and availability.
 
--	Confidentiality is largely covered by the source of the information being open source and the fact that it is at a national scale resolution and so the identifiability of the people in the study is not a concern here. The body holding any of the original data would need to ensure that they comply with European and Spanish data laws to ensure that the data they are storing is appropriate and in an appropriate format. All work was completed through Microsoft Teams, a git repository and Overleaf – all of which for the personal privacy of the team require password protection and encrypt out personal information.
+-   Confidentiality is largely covered by the source of the information being open source and the fact that it is at a national scale resolution and so the identifiability of the people in the study is not a concern here. The body holding any of the original data would need to ensure that they comply with European and Spanish data laws to ensure that the data they are storing is appropriate and in an appropriate format. All work was completed through Microsoft Teams, a git repository and Overleaf -- all of which for the personal privacy of the team require password protection and encrypt out personal information.
 
--	Integrity was maintained through the upkeep of a git repository ensuring that we had a complete record of any code and any changes made to the code throughout, this meant we could ensure the code present was the most up to date and relevant through looking at the complete record of changes since the project start. The data was linked directly to the Kaggle dataset to ensure no local edits would affect it, this does mean that we relied on the integrity of the Kaggle dataset.
+-   Integrity was maintained through the upkeep of a git repository ensuring that we had a complete record of any code and any changes made to the code throughout, this meant we could ensure the code present was the most up to date and relevant through looking at the complete record of changes since the project start. The data was linked directly to the Kaggle dataset to ensure no local edits would affect it, this does mean that we relied on the integrity of the Kaggle dataset.
 
--	Availability was ensuring through storage of all data, codes and reports on cloud-based systems. This ensures that all people could access any of the material at any point provided an internet connection was present. Project management was completed through Microsoft Teams, also a cloud-based system which would send reminders and track progress automatically. The code was stored in an open git repository which would mean if people wished to independently validate our results this could be completed as well.
+-   Availability was ensuring through storage of all data, codes and reports on cloud-based systems. This ensures that all people could access any of the material at any point provided an internet connection was present. Project management was completed through Microsoft Teams, also a cloud-based system which would send reminders and track progress automatically. The code was stored in an open git repository which would mean if people wished to independently validate our results this could be completed as well.
 
--	Need comments on actual process of encryption for passwords etc? Doesn’t seem strictly relevant
-
+-   Need comments on actual process of encryption for passwords etc? Doesn't seem strictly relevant
 
 # Exploratory Data Analysis
 
