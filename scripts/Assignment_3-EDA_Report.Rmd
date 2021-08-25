@@ -22,7 +22,9 @@ Daniel Wrench 300398222
 
 *1-3 pages, 6 marks*
 
-We chose to study a time series dataset about electricity generation in Spain over a three-year period. This data originally comes from The original dataset, which we downloaded from the website Kaggle, contained variables for electricity consumption, generation, and pricing, recorded every hour, including day-ahead forecasts. These are recorded from the start of 2015 to the end of 2018. For this exploration of the data, we limited our investigation to hourly electricity generation, which is divided into several different generation methods/sources.
+We chose to study a time series dataset about electricity generation in Spain over a four-year period. This data originally comes the "ENTSO-E Transparency Platform" dashboard (<https://transparency.entsoe.eu/dashboard/show>). ENTSO stands for European Network of Transmission System Operators for Electricity, and this website is the central collection and visualisation repository of electricity generation, transportation and consumption data across Europe. European Member States are required to submit this data to this platform. The data for Spain from the start of 2015 to the end of 2018 was collected from the dashboard and published on the data repository website Kaggle. This is where the data for this report was downloaded from (<https://www.kaggle.com/nicholasjhana/energy-consumption-generation-prices-and-weather>). *Chuck the links in this paragraph in footnotes?*
+
+The raw dataset from Kaggle contained variables for electricity consumption, generation, and pricing, recorded every hour of the four years, as well as day-ahead forecasts. For this exploration of the data, we limited our investigation to hourly electricity generation, which is divided into several different generation methods/sources.
 
 The question we formulated to guide our EDA is as follows:
 
