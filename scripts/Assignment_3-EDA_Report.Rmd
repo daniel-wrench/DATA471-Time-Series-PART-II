@@ -16,13 +16,12 @@ output:
 # Load libraries
 library(tidyverse)
 library(magrittr)
-library(modelsummary)
-library(plotly)
-library(imputeTS)
 library(lubridate)
+library(imputeTS)
+library(modelsummary)
+library(corrplot)
+library(plotly)
 library(timetk)
-library(ggcorrplot)
-library(gridExtra)
 ```
 
 ```{r data, echo=FALSE}
@@ -137,6 +136,14 @@ datasummary(f, data_table, output="markdown")
 
 ```{r correlation, echo=FALSE}
 data %>% select(-"time") %>% datasummary_correlation()
+```
+
+```{r, echo=FALSE}
+# Correlation plot
+df_corr <- data[,2:ncol(data)]
+
+corrmatrix <- df_corr %>% cor()
+corrplot(corrmatrix, method = "color", addCoef.col="black", order = "AOE", number.cex= 4/ncol(data), tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'n')
 ```
 
 
