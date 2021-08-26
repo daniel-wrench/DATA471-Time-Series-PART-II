@@ -2,31 +2,37 @@
 title: "EDA of Spanish electricity generation 2015-2018"
 subtitle: 'Group 17: Time Series - Assignment 3 - EDA Report'
 output:
-  html_notebook:
-    toc: yes
-    toc_depth: 2
-    toc_float: yes
   html_document:
     toc: yes
     toc_depth: '2'
     df_print: paged
+  html_notebook:
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
 
 ```{r libraries, echo=FALSE, message=FALSE, warning=FALSE}
 # Load libraries
 library(tidyverse)
 library(magrittr)
-library(modelsummary)
-library(plotly)
-library(imputeTS)
 library(lubridate)
+library(imputeTS)
+library(modelsummary)
+library(corrplot)
+library(plotly)
 library(timetk)
-library(ggcorrplot)
-library(gridExtra)
 ```
 
 ```{r data, echo=FALSE}
 df <- read.csv("../data/energy_dataset.csv")
+
+# Change to datetime var
+df$time <- as_datetime(df$time)
 
 unimputed_data <-df %>%
   select(-c(generation.fossil.coal.derived.gas,
@@ -59,13 +65,9 @@ names(data) <- c("time",
                              "Waste",
                              "Wind Onshore")
         
-# Change to datetime var
-data$time <- as_datetime(data$time)
 
 data_long <- data %>% pivot_longer(cols = -time, names_to = "generation_source")
 ```
-
-
 
 Daniel Patterson 300467629
 
@@ -75,13 +77,13 @@ Daniel Wrench 300398222
 
 **Due 5pm Tuesday 31st August**
 
-**This report is accompanied by an online dashboard, developed in R Shiny.** This is available*at the following link/by running the app.R file*. The app allows interactive visualisation of electricity generation over time, and is discussed in greater detail in the section [Variation over time].
+**This report is accompanied by an online dashboard, developed in R Shiny.** This is available *at the following link/by running the app.R file*. The app allows interactive visualisation of electricity generation over time, and is discussed in greater detail in the section [Variation over time].
 
 # Background and Data
 
 *1-3 pages, 6 marks*
 
-We chose to study a time series dataset about electricity generation in Spain over a four-year period. This data originally comes the "ENTSO-E Transparency Platform" dashboard (<https://transparency.entsoe.eu/dashboard/show>). ENTSO stands for European Network of Transmission System Operators for Electricity, and this website is the central collection and visualisation repository of electricity generation, transportation and consumption data across Europe. European Member States are required to submit this data to this platform. The data for Spain from the start of 2015 to the end of 2018 was collected from the dashboard and published on the data repository website Kaggle. This is where the data for this report was downloaded from (<https://www.kaggle.com/nicholasjhana/energy-consumption-generation-prices-and-weather>). *Chuck the links in this paragraph in footnotes?*
+We chose to study a time series dataset about electricity generation in Spain over a four-year period. This data originally comes the "ENTSO-E Transparency Platform" dashboard (<https://transparency.entsoe.eu/dashboard/show>). ENTSO stands for *European Network of Transmission System Operators for Electricity*, and this website is the central collection and visualisation repository of electricity generation, transportation and consumption data across Europe. European Member States are required to submit this data to this platform. The data for Spain from the start of 2015 to the end of 2018 was collected from the dashboard and published on the data repository website Kaggle. This is where the data for this report was downloaded from (<https://www.kaggle.com/nicholasjhana/energy-consumption-generation-prices-and-weather>). *Chuck the links in this paragraph in footnotes?*
 
 The raw dataset from Kaggle contained variables for electricity consumption, generation, and pricing, recorded every hour of the four years, as well as day-ahead forecasts. For this exploration of the data, we limited our investigation to hourly electricity generation, which is divided into several different generation methods/sources.
 
@@ -91,32 +93,42 @@ The question we formulated to guide our EDA is as follows:
 
 This question is worth investigating due to the pressing global challenge of climate change, and the consequent need for countries to transition to a sustainable energy economy. In order for this to be possible, we need to understand how electricity is currently being generated and what the long-term trends are, to see whether a nation's energy policy should continue to diverge from the current trajectory. Furthermore, governments need to know how electricity generation methods vary seasonally and what interdependencies there are.
 
-The dataset contains hourly recordings of the amount of power generated from 14 different sources in Spain between 2015 and 2019. After removing the generation methods with no recorded values there were 22 observations with missing values. Of these, there were two series of eight consecutive missing values. The missing values were imputed using linear interpolation which appears to have generated plausible replacement values.
+After removing the variables that were not relevant to our analysis, and those that contained no observations, the dataset contained hourly recordings of the amount of power generated from 14 different sources in Spain between 2015 and 2019. Each variable had between 17 and 19 missing values. Most of these missing values occurred across variables: there were 17 hours in which no data was available, and six hours in which only some of the data was missing. The missing values were imputed using linear interpolation, which appears to have generated plausible replacement values. The only area of minor concern was that of the 23 rows with missing data, six of them are consecutive. We investigated this area and found that our interpolation looks acceptable, as shown in the plot below.
+
+```{r warning=FALSE}
+ggplot(unimputed_data[90:120,]) + geom_point(aes(x= time, y = generation.biomass)) + labs(x = '', y = 'Biomass', title = "Variable pre-linear interpolation")
+
+data$interp_biomass <- as.integer(is.na(unimputed_data$generation.biomass))
+
+ggplot(data[90:120,]) + geom_point(aes(x= time, y = Biomass, colour = interp_biomass), show.legend = FALSE) + scale_color_gradient(low="black", high="red") + labs(x = '', title = "Variable post-linear interpolation")
+
+```
 
 # Ethics, Privacy, and Security
 
 ## Ethics
-While there is no intention to utilize this study for any purpose beyond academic, the ethical concerns relating to this project entirely come from possible uses and interpretations of the outputs of this study in the real world.  Primarily these would relate to political decisions of national energy policy and investment. Spain has an established nuclear sector which has had opposition since the 1950s when the government initially announced its intentions to develop the capability (https://en.wikipedia.org/wiki/Anti-nuclear_movement_in_Spain ). The arguments against nuclear largely focus on the hazardous waste, potential consequences of disaster and association with weapons of mass destruction. If this paper were utilized to argue for further development of Spain’s nuclear power industry, considerations surrounding these concerns must be considered. Similarly, there are growing concerns surround hydrocarbon-based fuel sources and the impact on climate and air quality, this study specifically makes no recommendations however should people decide to develop hydrocarbon-based energy sources they would need to consider the ethics of the impacts on the environment. Interestingly the existence of global warming is a political and, in some ways, ethical issue and so this would also need to be considered if information from this study were used to support or disprove it.  
 
-Any decisions relating to a change in the energy sector would impact people in several ways beyond the ethical concerns relating to the technology. Any modelling completed from this data is at a national level and so assumes a uniform complete accessibility to energy from all sources, this is inherently not the case. If the government decided to shift to a non-diversified energy model or banned local diesel generators there is the small possibility that areas, most likely rural, would no longer have access to electricity and have an adverse effect on these people lives. More likely is where, due to political pressure, the government chooses to invest in a more expensive source of energy, for example due to a drive to achieve a higher proportion of green energy ( https://www.theguardian.com/environment/2019/jun/14/power-to-the-people-how-spanish-cities-took-control-of-energy ). Pushing power prices up  would disproportionately affect people from a lower socioeconomic background and fuel a growing divide between the classes and creating a growing poverty in the country. This could be further exacerbated if with the investment in new technology automation is increased, leading to greater efficiency at the cost of lower skilled jobs, again disproportionately affecting the lower socioeconomic class. 
+While there is no intention to utilize this study for any purpose beyond academic, the ethical concerns relating to this project entirely come from possible uses and interpretations of the outputs of this study in the real world. Primarily these would relate to political decisions of national energy policy and investment. Spain has an established nuclear sector which has had opposition since the 1950s when the government initially announced its intentions to develop the capability (<https://en.wikipedia.org/wiki/Anti-nuclear_movement_in_Spain> ). The arguments against nuclear largely focus on the hazardous waste, potential consequences of disaster and association with weapons of mass destruction. If this paper were utilized to argue for further development of Spain's nuclear power industry, considerations surrounding these concerns must be considered. Similarly, there are growing concerns surround hydrocarbon-based fuel sources and the impact on climate and air quality, this study specifically makes no recommendations however should people decide to develop hydrocarbon-based energy sources they would need to consider the ethics of the impacts on the environment. Interestingly the existence of global warming is a political and, in some ways, ethical issue and so this would also need to be considered if information from this study were used to support or disprove it.
 
-There is a small risk of the creation of feedback cycles relating to the above concerns. This would only occur if decisions made based on the results of this study created a negative affect as discussed above, which was then integrated into another model which the further exasipated the issue in turn. As this study is a non-reactive one off and there  is no intention to base decision making upon the models of this exercise, the concern of feedback loops has been considered outside the remit of the ethical concerns of this study.
+Any decisions relating to a change in the energy sector would impact people in several ways beyond the ethical concerns relating to the technology. Any modelling completed from this data is at a national level and so assumes a uniform complete accessibility to energy from all sources, this is inherently not the case. If the government decided to shift to a non-diversified energy model or banned local diesel generators there is the small possibility that areas, most likely rural, would no longer have access to electricity and have an adverse effect on these people lives. More likely is where, due to political pressure, the government chooses to invest in a more expensive source of energy, for example due to a drive to achieve a higher proportion of green energy ( <https://www.theguardian.com/environment/2019/jun/14/power-to-the-people-how-spanish-cities-took-control-of-energy> ). Pushing power prices up would disproportionately affect people from a lower socioeconomic background and fuel a growing divide between the classes and creating a growing poverty in the country. This could be further exacerbated if with the investment in new technology automation is increased, leading to greater efficiency at the cost of lower skilled jobs, again disproportionately affecting the lower socioeconomic class.
 
-Spain has many formally recognized ethnicities and minorities (https://minorityrights.org/country/spain/) however the Spanish Personal Data Protection Act No. 15/1999 does not extend any explicit protection for or guidance on the use and storage of data from these groups. This means that handling approaches and considerations like the protective measures and regulations offered to people such as the Māori in New Zealand are not present or relevant in Spanish law (https://ec.europa.eu/newsroom/just/redirection/document/45791). Furthermore, this data is recorded and stored at a national level from generation source rather than a conglomerate of personal data and as such there is little about personal ethics and the use of personal data that is relevant or of concern to this study. There are no religious concerns with energy modelling beyond those discussed to do with the environment and social impacts.
+There is a small risk of the creation of feedback cycles relating to the above concerns. This would only occur if decisions made based on the results of this study created a negative affect as discussed above, which was then integrated into another model which the further exacerbated the issue in turn. As this study is a non-reactive one off and there is no intention to base decision making upon the models of this exercise, the concern of feedback loops has been considered outside the remit of the ethical concerns of this study.
+
+Spain has many formally recognized ethnicities and minorities (<https://minorityrights.org/country/spain/>) however the Spanish Personal Data Protection Act No. 15/1999 does not extend any explicit protection for or guidance on the use and storage of data from these groups. This means that handling approaches and considerations like the protective measures and regulations offered to people such as the Māori in New Zealand are not present or relevant in Spanish law (<https://ec.europa.eu/newsroom/just/redirection/document/45791>). Furthermore, this data is recorded and stored at a national level from generation source rather than a conglomerate of personal data and as such there is little about personal ethics and the use of personal data that is relevant or of concern to this study. There are no religious concerns with energy modelling beyond those discussed to do with the environment and social impacts.
 
 ## Privacy
 
-Privacy relates to your right not to be asked invasive questions or to needlessly provide personal information as well as the assurance that any publications made from the data cannot be used to identify you.  The data from this study was collected at source of generation and then generalized to a national resolution. This means that there has never been any personal information stored within the data and would only be a concern if the data was comprised of the sum of individuals energy use added up and then anonymized. A larger concern relates to if the data was of finer resolution, such as region or street where theoretically if the sample size is small, even with anonymized data, individuals could be identified with local knowledge, again this is not the case as information is provided at a national level and measures taken at source. This means that data anonymization techniques such as differential privacy are not only not necessary, but detrimental to the accuracy. 
+Privacy relates to your right not to be asked invasive questions or to needlessly provide personal information as well as the assurance that any publications made from the data cannot be used to identify you. The data from this study was collected at source of generation and then generalized to a national resolution. This means that there has never been any personal information stored within the data and would only be a concern if the data was comprised of the sum of individuals energy use added up and then anonymised. A larger concern relates to if the data was of finer resolution, such as region or street where theoretically if the sample size is small, even with anonymised data, individuals could be identified with local knowledge, again this is not the case as information is provided at a national level and measures taken at source. This means that data anonymisation techniques such as differential privacy are not only not necessary, but detrimental to the accuracy.
 
-Beyond personal privacy, as this data is available publicly from  Spanish TSO Red Electric España there is no concern of corporate property breach. Further to this, the body holding the data is the national government body, they have ensured that it complies with both Spanish and European data privacy regulations. 
+Beyond personal privacy, as this data is available publicly from Spanish TSO Red Electric España there is no concern of corporate property breach. Further to this, the body holding the data is the national government body, they have ensured that it complies with both Spanish and European data privacy regulations.
 
 ## Security
+
 Confidentiality, integrity, and availability are the three main factors that should be considered when ensure the security of the project. Confidentiality is ensured through the resolution of the data being at a national scale and being collected at source thus ensuring no identifiable information is available in the first place. This data is publicly available and so there is no need to ensure that this data is kept fully secure while handling it. If there were identifiable aspects to the original data, the responsibility to ensure this information is secure lies with the body holding the information and to ensure they are compliant with any national or European data laws. The analysis, organization and modelling were completed and stored through Microsoft Teams, a git repository and Overleaf which all require a minimum password protection or multifactor authentication. While the information within each storage means does not need to be protected, each company has a responsibility to protect the personal information of our team.
 
 Integrity was maintained through the upkeep of a git repository ensuring that we had a complete record of any code and any changes made to the code throughout. This ensured the code present was the most up to date and relevant while also allowing us to keep records of versions throughout the project in case of needing to roll back edits to the code. The data was linked directly to the Kaggle dataset to ensure no local edits would affect it; this does mean that we relied on the integrity of the Kaggle dataset. Access to edit all files was only allowed through team members accounts which were all password protected. Even if someone obtained access to the files and made unregulated changes, these would also be recorded through git and recorded, ensuring that it would be simple to a point we were sure the code was correct and our work.
 
-Availability of data and files was ensured through utilizing cloud-based platforms for all data, codes, and reports. This ensures that all members of the team could access all files in their most up to date format provided an internet connection was present. Each update to the formats would be associated with the respective team member account and so would be authorized within the platform. All platforms are mainstream and so utilize top level protection however should the servers go down due to something such as a DDOS attack, each git repository is stored locally on devices as well so one of us would have the most up to date file. 
-
+Availability of data and files was ensured through utilizing cloud-based platforms for all data, codes, and reports. This ensures that all members of the team could access all files in their most up to date format provided an internet connection was present. Each update to the formats would be associated with the respective team member account and so would be authorized within the platform. All platforms are mainstream and so utilize top level protection however should the servers go down due to something such as a DDOS attack, each git repository is stored locally on devices as well so one of us would have the most up to date file.
 
 # Exploratory Data Analysis
 
@@ -125,26 +137,39 @@ Availability of data and files was ensured through utilizing cloud-based platfor
 ## Overall statistics
 
 ### Means and standard deviations
+
 ```{r summary stats, echo=FALSE}
 data_table <- data %>% select(c("Nuclear", "Gas", "Wind Onshore", "Hard Coal", "Hydro Reservoir", "Solar", "Hydro River", "Lignite", "Hydro Pumped", "Biomass", "Oil", "Waste", "Other Renewable", "Other"))
 f <- All(data_table) ~ Mean + SD + Min + Median + Max + Histogram
 datasummary(f, data_table, output="markdown")
 ```
 
-
-
 ### Correlations
 
 ```{r correlation, echo=FALSE}
-data %>% select(-"time") %>% datasummary_correlation()
+#data %>% select(-"time") %>% datasummary_correlation()
 ```
 
+As discussed in the Background section, understanding interdependencies between electricity generation methods is important to maintaining energy availability in the short- and medium-term, but also to manage energy transition in the long-term. In the correlation plot below, we find that two generation sources that are closely related to other sources are Hard Coal and Hydro River. The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem.
+
+```{r, echo=FALSE}
+# Correlation plot
+df_corr <- data[,2:ncol(data)]
+
+corrmatrix <- df_corr %>% cor()
+corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", number.cex= 0.7, tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'n')
+```
 
 ## Variation over time
 
 The [R Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) accompanies this section of the EDA. The dashboard allows interactive exploration of each electricity generation method over time, with customisation of which time period to look at, how much to smooth the data, and how to compare the variables. Here, we focus on the most interesting patterns.
 
 *Include comments on trends and seasonality*
+
+*Insert code here to plot smoothed Solar variable over time to demonstrate seasonality*
+```{r}
+
+```
 
 *Include plots of key correlated variables*
 

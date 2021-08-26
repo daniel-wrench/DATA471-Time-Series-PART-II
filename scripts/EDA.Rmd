@@ -60,7 +60,8 @@ df <- df %>%
             generation.marine,
             generation.hydro.pumped.storage.aggregated,
             generation.wind.offshore,
-            forecast.wind.offshore.eday.ahead))
+            forecast.wind.offshore.eday.ahead,
+            total.load.actual)) # Removing this one too as we're not analysing it
 ```
 
 ```{r}
@@ -79,6 +80,14 @@ df[!complete.cases(df),]
 missing_per_row <- rowSums(is.na(df[!complete.cases(df),]))
 missing_per_row
 sum(missing_per_row > 1)
+```
+
+
+```{r}
+```
+
+
+```{r}
 sum(missing_per_row[missing_per_row > 1])/sum(missing_per_row)
 ```
 
