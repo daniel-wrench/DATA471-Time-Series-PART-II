@@ -12,7 +12,7 @@ output:
     df_print: paged
 ---
 
-Daniel Patterson *insert student ID here*
+Daniel Patterson 300467629
 
 Rob Tomkies 300588353
 
@@ -36,9 +36,7 @@ The question we formulated to guide our EDA is as follows:
 
 This question is worth investigating due to the pressing global challenge of climate change, and the consequent need for countries to transition to a sustainable energy economy. In order for this to be possible, we need to understand how electricity is currently being generated and what the long-term trends are, to see whether a nation's energy policy should continue to diverge from the current trajectory. Furthermore, governments need to know how electricity generation methods vary seasonally and what interdependencies there are.
 
-*Comment on structure of dataset*
-
-*Comment on missing data, interpolation*
+The dataset contains hourly recordings of the amount of power generated from 14 different sources in Spain between 2015 and 2019. After removing the generation methods with no recorded values there were 22 observations with missing values. Of these, there were two series of eight consecutive missing values. The missing values were imputed using linear interpolation which appears to have generated plausible replacement values.
 
 # Ethics, Privacy, and Security
 
@@ -77,7 +75,7 @@ Availability of data and files was ensured through utilizing cloud-based platfor
 
 ## Variation over time
 
-The R Shiny dashboard (*available at ...*) accompanies this section of the EDA. The dashboard allows interactive exploration of each electricity generation method over time, with customisation of which time period to look at, how much to smooth the data, and how to compare the variables. Here, we focus on the most interesting patterns.
+The [R Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) accompanies this section of the EDA. The dashboard allows interactive exploration of each electricity generation method over time, with customisation of which time period to look at, how much to smooth the data, and how to compare the variables. Here, we focus on the most interesting patterns.
 
 *Include comments on trends and seasonality*
 
