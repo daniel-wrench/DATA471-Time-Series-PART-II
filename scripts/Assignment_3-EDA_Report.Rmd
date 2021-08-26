@@ -12,6 +12,61 @@ output:
     df_print: paged
 ---
 
+```{r libraries, echo=FALSE, message=FALSE, warning=FALSE}
+# Load libraries
+library(tidyverse)
+library(magrittr)
+library(modelsummary)
+library(plotly)
+library(imputeTS)
+library(lubridate)
+library(timetk)
+library(ggcorrplot)
+library(gridExtra)
+```
+
+```{r data, echo=FALSE}
+df <- read.csv("../data/energy_dataset.csv")
+
+unimputed_data <-df %>%
+  select(-c(generation.fossil.coal.derived.gas,
+                    generation.fossil.oil.shale,
+                    generation.fossil.peat,
+                    generation.geothermal,
+                    generation.marine,
+                    generation.hydro.pumped.storage.aggregated,
+                    generation.wind.offshore,
+                    forecast.wind.offshore.eday.ahead)) 
+
+data <- unimputed_data %>% 
+          mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear')) %>% 
+          select(c(1, starts_with("generation")))
+
+# Giving vars simpler names
+names(data) <- c("time",
+                 "Biomass",
+                 "Lignite",
+                             "Gas",
+                             "Hard Coal",
+                             "Oil",
+                             "Hydro Pumped",
+                             "Hydro River",
+                             "Hydro Reservoir",
+                             "Nuclear",
+                             "Other",
+                             "Other Renewable",
+                             "Solar",
+                             "Waste",
+                             "Wind Onshore")
+        
+# Change to datetime var
+data$time <- as_datetime(data$time)
+
+data_long <- data %>% pivot_longer(cols = -time, names_to = "generation_source")
+```
+
+
+
 Daniel Patterson 300467629
 
 Rob Tomkies 300588353
@@ -70,8 +125,20 @@ Availability of data and files was ensured through utilizing cloud-based platfor
 ## Overall statistics
 
 ### Means and standard deviations
+```{r summary stats, echo=FALSE}
+data_table <- data %>% select(c("Nuclear", "Gas", "Wind Onshore", "Hard Coal", "Hydro Reservoir", "Solar", "Hydro River", "Lignite", "Hydro Pumped", "Biomass", "Oil", "Waste", "Other Renewable", "Other"))
+f <- All(data_table) ~ Mean + SD + Min + Median + Max + Histogram
+datasummary(f, data_table, output="markdown")
+```
+
+
 
 ### Correlations
+
+```{r correlation, echo=FALSE}
+data %>% select(-"time") %>% datasummary_correlation()
+```
+
 
 ## Variation over time
 
