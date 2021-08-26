@@ -1,11 +1,15 @@
 ---
 title: "EDA of Spanish electricity generation 2015-2018"
 subtitle: 'Group 17: Time Series - Assignment 3 - EDA Report'
-output: 
+output:
   html_notebook:
-    toc: true
+    toc: yes
     toc_depth: 2
-    toc_float: True
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_depth: '2'
+    df_print: paged
 ---
 
 Daniel Patterson *insert student ID here*
@@ -38,45 +42,28 @@ This question is worth investigating due to the pressing global challenge of cli
 
 # Ethics, Privacy, and Security
 
-*Brain dumped at this stage, let me know any areas that need adding in*
+## Ethics
+While there is no intention to utilize this study for any purpose beyond academic, the ethical concerns relating to this project entirely come from possible uses and interpretations of the outputs of this study in the real world.  Primarily these would relate to political decisions of national energy policy and investment. Spain has an established nuclear sector which has had opposition since the 1950s when the government initially announced its intentions to develop the capability (https://en.wikipedia.org/wiki/Anti-nuclear_movement_in_Spain ). The arguments against nuclear largely focus on the hazardous waste, potential consequences of disaster and association with weapons of mass destruction. If this paper were utilized to argue for further development of Spain’s nuclear power industry, considerations surrounding these concerns must be considered. Similarly, there are growing concerns surround hydrocarbon-based fuel sources and the impact on climate and air quality, this study specifically makes no recommendations however should people decide to develop hydrocarbon-based energy sources they would need to consider the ethics of the impacts on the environment. Interestingly the existence of global warming is a political and, in some ways, ethical issue and so this would also need to be considered if information from this study were used to support or disprove it.  
 
-Ethics: - Implications if used to inform future energy decisions, e.g., if it shows nuclear to be the best there are some ethical concerns around this. Or if shows that Spain is increasing its carbon-based sources then this inherently has implications.
+Any decisions relating to a change in the energy sector would impact people in several ways beyond the ethical concerns relating to the technology. Any modelling completed from this data is at a national level and so assumes a uniform complete accessibility to energy from all sources, this is inherently not the case. If the government decided to shift to a non-diversified energy model or banned local diesel generators there is the small possibility that areas, most likely rural, would no longer have access to electricity and have an adverse effect on these people lives. More likely is where, due to political pressure, the government chooses to invest in a more expensive source of energy, for example due to a drive to achieve a higher proportion of green energy ( https://www.theguardian.com/environment/2019/jun/14/power-to-the-people-how-spanish-cities-took-control-of-energy ). Pushing power prices up  would disproportionately affect people from a lower socioeconomic background and fuel a growing divide between the classes and creating a growing poverty in the country. This could be further exacerbated if with the investment in new technology automation is increased, leading to greater efficiency at the cost of lower skilled jobs, again disproportionately affecting the lower socioeconomic class. 
 
--   The generation of energy itself has few ethical concerns however certain religious groups may be anti-technology
+There is a small risk of the creation of feedback cycles relating to the above concerns. This would only occur if decisions made based on the results of this study created a negative affect as discussed above, which was then integrated into another model which the further exasipated the issue in turn. As this study is a non-reactive one off and there  is no intention to base decision making upon the models of this exercise, the concern of feedback loops has been considered outside the remit of the ethical concerns of this study.
 
--   Again, if used to inform future energy decisions this may have implications on people's jobs -- e.g., coal mines/ports being put out of business.
+Spain has many formally recognized ethnicities and minorities (https://minorityrights.org/country/spain/) however the Spanish Personal Data Protection Act No. 15/1999 does not extend any explicit protection for or guidance on the use and storage of data from these groups. This means that handling approaches and considerations like the protective measures and regulations offered to people such as the Māori in New Zealand are not present or relevant in Spanish law (https://ec.europa.eu/newsroom/just/redirection/document/45791). Furthermore, this data is recorded and stored at a national level from generation source rather than a conglomerate of personal data and as such there is little about personal ethics and the use of personal data that is relevant or of concern to this study. There are no religious concerns with energy modelling beyond those discussed to do with the environment and social impacts.
 
--   As this data is at a national level in summaries there is little about personal ethics that can be considered as this is the generation by source not the utilization and as such the data is not about the people rather the country as a whole.
+## Privacy
 
--   There is no intention of modelling cost effectiveness of sources and so the socioeconomic impacts of selecting a more expensive energy source for the environmental friendliness however if these models were used in an argument to this effect there could be concerns.
+Privacy relates to your right not to be asked invasive questions or to needlessly provide personal information as well as the assurance that any publications made from the data cannot be used to identify you.  The data from this study was collected at source of generation and then generalized to a national resolution. This means that there has never been any personal information stored within the data and would only be a concern if the data was comprised of the sum of individuals energy use added up and then anonymized. A larger concern relates to if the data was of finer resolution, such as region or street where theoretically if the sample size is small, even with anonymized data, individuals could be identified with local knowledge, again this is not the case as information is provided at a national level and measures taken at source. This means that data anonymization techniques such as differential privacy are not only not necessary, but detrimental to the accuracy. 
 
--   If the model includes a global warming factor and predicts that water e.g., would decrease -- some Americans may take offence - political.
+Beyond personal privacy, as this data is available publicly from  Spanish TSO Red Electric España there is no concern of corporate property breach. Further to this, the body holding the data is the national government body, they have ensured that it complies with both Spanish and European data privacy regulations. 
 
--   Spain has multiple ethnicities however none have governance or stipulations regarding the use of data that relates to them.
+## Security
+Confidentiality, integrity, and availability are the three main factors that should be considered when ensure the security of the project. Confidentiality is ensured through the resolution of the data being at a national scale and being collected at source thus ensuring no identifiable information is available in the first place. This data is publicly available and so there is no need to ensure that this data is kept fully secure while handling it. If there were identifiable aspects to the original data, the responsibility to ensure this information is secure lies with the body holding the information and to ensure they are compliant with any national or European data laws. The analysis, organization and modelling were completed and stored through Microsoft Teams, a git repository and Overleaf which all require a minimum password protection or multifactor authentication. While the information within each storage means does not need to be protected, each company has a responsibility to protect the personal information of our team.
 
-Privacy:
+Integrity was maintained through the upkeep of a git repository ensuring that we had a complete record of any code and any changes made to the code throughout. This ensured the code present was the most up to date and relevant while also allowing us to keep records of versions throughout the project in case of needing to roll back edits to the code. The data was linked directly to the Kaggle dataset to ensure no local edits would affect it; this does mean that we relied on the integrity of the Kaggle dataset. Access to edit all files was only allowed through team members accounts which were all password protected. Even if someone obtained access to the files and made unregulated changes, these would also be recorded through git and recorded, ensuring that it would be simple to a point we were sure the code was correct and our work.
 
--   Your right not to be asked invasive questions, or to needlessly provide personal information. The data is collected at source and contains no personal information.
+Availability of data and files was ensured through utilizing cloud-based platforms for all data, codes, and reports. This ensures that all members of the team could access all files in their most up to date format provided an internet connection was present. Each update to the formats would be associated with the respective team member account and so would be authorized within the platform. All platforms are mainstream and so utilize top level protection however should the servers go down due to something such as a DDOS attack, each git repository is stored locally on devices as well so one of us would have the most up to date file. 
 
--   Privacy is the assurance that any publication which relies on your personal information does not identify you. Again, collected by source so no way that this information is identifiable. This would be more of a concern if data was by region, street or account specified however the public information does not.
-
--   Data does not contain any form of individual record per person or group of people and as such privacy of individuals is guaranteed -- the data is conglomerate to a national scale and is collected at source of generation rather than being the sum total of individual usage.
-
--   As such approaches like differential privacy are not necessary and would be detrimental if applied.
-
--   Data is available publicly from Spanish TSO Red Electric España and as such no concerns of corporate property breach.
-
--   As this data is publicly available and provided by the Spanish national data source it complies with Spanish and European data privacy regulation
-
-Security: - Three main factors should be considered when trying to keep this project secure -- confidentiality, integrity and availability.
-
--   Confidentiality is largely covered by the source of the information being open source and the fact that it is at a national scale resolution and so the identifiability of the people in the study is not a concern here. The body holding any of the original data would need to ensure that they comply with European and Spanish data laws to ensure that the data they are storing is appropriate and in an appropriate format. All work was completed through Microsoft Teams, a git repository and Overleaf -- all of which for the personal privacy of the team require password protection and encrypt out personal information.
-
--   Integrity was maintained through the upkeep of a git repository ensuring that we had a complete record of any code and any changes made to the code throughout, this meant we could ensure the code present was the most up to date and relevant through looking at the complete record of changes since the project start. The data was linked directly to the Kaggle dataset to ensure no local edits would affect it, this does mean that we relied on the integrity of the Kaggle dataset.
-
--   Availability was ensuring through storage of all data, codes and reports on cloud-based systems. This ensures that all people could access any of the material at any point provided an internet connection was present. Project management was completed through Microsoft Teams, also a cloud-based system which would send reminders and track progress automatically. The code was stored in an open git repository which would mean if people wished to independently validate our results this could be completed as well.
-
--   Need comments on actual process of encryption for passwords etc? Doesn't seem strictly relevant
 
 # Exploratory Data Analysis
 
