@@ -2,14 +2,14 @@
 title: "EDA of Spanish electricity generation 2015-2018"
 subtitle: 'Group 17: Time Series - Assignment 3 - EDA Report'
 output:
-  html_document:
-    toc: yes
-    toc_depth: '2'
-    df_print: paged
-  html_notebook:
+  html_document: 
     toc: yes
     toc_depth: 2
-    toc_float: yes
+    fig_caption: yes
+  # html_notebook:
+  #   toc: yes
+  #   toc_depth: 2
+  #   toc_float: no
 ---
 
 ```{r setup, include=FALSE}
@@ -69,11 +69,7 @@ names(data) <- c("time",
 data_long <- data %>% pivot_longer(cols = -time, names_to = "generation_source")
 ```
 
-Daniel Patterson 300467629
-
-Rob Tomkies 300588353
-
-Daniel Wrench 300398222
+Daniel Patterson (300467629), Rob Tomkies (300588353), and Daniel Wrench (300398222)
 
 **Due 5pm Tuesday 31st August**
 
@@ -93,16 +89,30 @@ The question we formulated to guide our EDA is as follows:
 
 This question is worth investigating due to the pressing global challenge of climate change, and the consequent need for countries to transition to a sustainable energy economy. In order for this to be possible, we need to understand how electricity is currently being generated and what the long-term trends are, to see whether a nation's energy policy should continue to diverge from the current trajectory. Furthermore, governments need to know how electricity generation methods vary seasonally and what interdependencies there are.
 
-After removing the variables that were not relevant to our analysis, and those that contained no observations, the dataset contained hourly recordings of the amount of power generated from 14 different sources in Spain between 2015 and 2019. Each variable had between 17 and 19 missing values. Most of these missing values occurred across variables: there were 17 hours in which no data was available, and six hours in which only some of the data was missing. The missing values were imputed using linear interpolation, which appears to have generated plausible replacement values. The only area of minor concern was that of the 23 rows with missing data, six of them are consecutive. We investigated this area and found that our interpolation looks acceptable, as shown in the plot below.
+After removing the variables that were not relevant to our analysis, and those that contained no observations, the dataset contained hourly recordings of the amount of power generated from 14 different sources in Spain between 2015 and 2019. Each variable had between 17 and 19 missing values. Most of these missing values occurred across variables: there were 17 hours in which no data was available, and six hours in which only some of the data was missing. In most cases, we were confident in imputing the missing values using linear interpolation. However, there was one area of slight concern: of the 23 rows with missing data, six of them are consecutive. The plots below show how this imputation affected some of the variables.
 
-```{r warning=FALSE}
-ggplot(unimputed_data[90:120,]) + geom_point(aes(x= time, y = generation.biomass)) + labs(x = '', y = 'Biomass', title = "Variable pre-linear interpolation")
+```{r}
 
-data$interp_biomass <- as.integer(is.na(unimputed_data$generation.biomass))
+# Creating interpolation indicator vars
+data$interp_gas <- as.integer(is.na(unimputed_data$generation.fossil.gas))
+data$interp_solar <- as.integer(is.na(unimputed_data$generation.solar))
 
-ggplot(data[90:120,]) + geom_point(aes(x= time, y = Biomass, colour = interp_biomass), show.legend = FALSE) + scale_color_gradient(low="black", high="red") + labs(x = '', title = "Variable post-linear interpolation")
-
+# Note that using geom_point is strictly more accurate
+ggplot(data[50:150,]) + geom_point(aes(x= time, y = Solar, colour = interp_solar), show.legend = FALSE) + scale_color_gradient(low="black", high="red") + labs(x = '', title = "Solar variable post-linear interpolation")
 ```
+
+The linear interpolation over the adjacent missing values in the Solar variable did not follow the strong seasonal pattern observed for this variable.
+
+```{r}
+ggplot(data[50:150,]) + geom_point(aes(x= time, y = `Gas`, colour = interp_solar), show.legend = FALSE) + scale_color_gradient(low="black", high="red") + labs(x = '', title = "Gas variable post-linear interpolation")
+
+# Removing indicator vars
+data <- data %>% select(-c(interp_gas, interp_solar))
+```
+
+The linear interpolation over the adjacent missing values in the Gas variable looks as if may also result in (very minor) distortion of the fluctuation in this variable, but it is less obvious than for Solar.
+
+Overall, despite linear interpolation not following the trend of the data for some variables, this gap represents a very small proportion of each time series, so we were content to make this small distortion of the data and apply the method.
 
 # Ethics, Privacy, and Security
 
@@ -166,10 +176,13 @@ The [R Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) accompani
 
 *Include comments on trends and seasonality*
 
-*Insert code here to plot smoothed Solar variable over time to demonstrate seasonality*
-```{r}
+Solar was an interesting generation source because it displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 6am and the few hours prior.
 
-```
+![**Sample of Solar time series with hourly smoothing**](../figures/solar_hourly.png){width=70%}
+
+In the next plot we can see that Solar is seasonal on a quarterly scale,  peaking in the second and third quarters and reaching a low in the third quarter. *Although the seasonality is the tidiest here I'm uncertain talking about quarters - would it be better to simply use the monthly smoothing and talk about that?*
+
+![**Sample of Solar time series with quarterly smoothing**](../figures/solar_quarterly.png){width=70%}
 
 *Include plots of key correlated variables*
 
