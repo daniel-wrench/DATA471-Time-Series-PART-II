@@ -245,4 +245,15 @@ In the next plot we can see that Solar is seasonal on a monthly scale. Electrici
 
 *1 page, 2 marks*
 
+*Quick bullet points before writing up*
+
+Daniel P:
+
+Rob:
+
+Daniel W:
+
+- Investigated and wrote about outliers and effect of linear interpolation
+- Investigated and wrote about correlations, long-term trends and seasonality 
+
 # Conclusion
