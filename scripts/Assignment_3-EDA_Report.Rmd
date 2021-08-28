@@ -13,7 +13,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.align = 'center')
 ```
 
 ```{r libraries, echo=FALSE, message=FALSE, warning=FALSE}
@@ -105,13 +105,13 @@ After removing the variables that were not relevant to our analysis, and those t
 
 As well as some missing values (discussed further below), we also discovered some outliers. Interestingly, these occurred across variables at the exact same timestamps. Specifically, we identified 3 rows in the raw dataset in which all but one generation source recorded a value of 0. This is shown in the plot below:
 
-![](../figures/strange_zeros.png){width=70%}
+![](../figures/strange_zeros.png){width=80%}
 
 Because they seem very unlikely to be true values, these outliers were removed. *We also identified two other rows were values were a significant departure from the typical range of that source, but were not equal to zero. These have not been removed because they could be plausible values.*
 
 After removing the outliers, each variable had between 18 and 22 missing values. Most of these missing values occurred across variables: there were 21 rows for which data for all or all but one variables were missing, and five rows in where only one variable was missing. In most cases, we were confident in imputing the missing values using linear interpolation. However, there was one area of slight concern: of the 26 rows with missing data, six of them are consecutive. The plots below show how this imputation affected some of the variables.
 
-```{r}
+```{r interpolation plot 1}
 # Creating interpolation indicator vars
 data$interp_gas <- as.integer(is.na(unimputed_data$generation.fossil.gas))
 data$interp_solar <- as.integer(is.na(unimputed_data$generation.solar))
@@ -122,7 +122,7 @@ ggplot(data[50:150,]) + geom_point(aes(x= time, y = Solar, colour = interp_solar
 
 The linear interpolation over the adjacent missing values in the Solar variable did not follow the strong seasonal pattern observed for this variable.
 
-```{r}
+```{r interpolation plot 2}
 ggplot(data[50:150,]) + geom_point(aes(x= time, y = `Gas`, colour = interp_solar), show.legend = FALSE) + scale_color_gradient(low="black", high="red") + labs(x = '', title = "Gas variable post-linear interpolation")
 
 # Removing indicator vars
@@ -177,7 +177,7 @@ The table above shows summary statistics for every generation source in the data
 
 As discussed in the Background section, understanding interdependencies between electricity generation sources is important to maintaining energy availability in the short- and medium-term, but also to manage energy transition in the long-term. Below the correlation plot we discuss the most interesting relationships in the dataset.
 
-```{r, echo=FALSE, warning=FALSE}
+```{r correlation plot, echo=FALSE, warning=FALSE}
 # Correlation plot
 df_corr <- data[,2:ncol(data)]
 
@@ -187,33 +187,39 @@ corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", numbe
 
 Nuclear, the largest overall contributor to electricity generation, is not does not have any significant correlations. Therefore, not only Nuclear an incredibly steady generation source, it is also one that does not depend on or affect the amount of electricity produced by other sources. Solar, on the other hand, is a much more variable source, but this correlation plot shows it is also a very independent generation method.
 
-Hydro Pumped is negatively correlated with every other source (apart from Nuclear, with which there is insignificant positive correlation).
+Hydro Pumped is negatively correlated with every other source (apart from Nuclear, with which there is insignificant positive correlation). This is because this source has the full name "pumped hydroelectric energy storage", and this source is used by electric power systems for load balancing. This is where excess or variable electricity is stored and released when demand is high - therefore, generation by this method is higher when other sources are lower.  
 
-we find that two generation sources that are closely related to other sources are Hard Coal, Hydro River, and Other Renewable, which is discussed in more detail below. (In comparison, ) 
+The three least independent generation sources - those most related to other sources - are Hard Coal, Hydro River, and Other Renewable. The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem. Other correlations are investigated further in the discussion of the time series plots in the next section.
 
-The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem.
-
-## Variation over time
+## Time series visualisation
 
 The [R Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) accompanies this section of the EDA. The dashboard allows interactive exploration of each electricity generation source over time, with customisation of which time period to look at, how much to smooth the data, and how to compare the variables. Here, we focus on the most interesting patterns.
 
-*Include comments on trends and seasonality*
+The plot below shows the five sources in the data with the most significant long-term trends over the four-year period. The similar or opposite nature of these trends between these generation sources are reflected in strong positive or negative correlations.
 
-Solar was an interesting generation source because it displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 6am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
+![**Biomass, Oil, Other Renewable, Other, and Waste time series with monthly smoothing**](../figures/5_sources.png){width=80%}
 
-![**Sample of Solar time series with hourly smoothing**](../figures/solar_hourly.png){width=70%}
+Hard Coal and Hydro River, as shown in the correlation plot, are the two least independent generation sources - in other words, those most related to the values of other sources. The plot below shows some examples of this interdependence, by plotting the variation over time of Hard Coal, Hydro River, and Hydro Reservoir.
+
+![**Hard Coal, Hydro Reservoir, and Hydro River time series with quarterly smoothing**](../figures/coal_two_hydros.png){width=80%}
+
+Due to the way the peaks and troughs of each source are either in phase or 180\degrees out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5).
+
+The only obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 6am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
+
+![**Sample of Solar time series with hourly smoothing**](../figures/solar_hourly.png){width=80%}
 
 In the next plot we can see that Solar is seasonal on a monthly scale. Electricity generation by solar peaks at around 2000MW in June or July each year, and hits a low of between 800MW and 1000MW in November or December each year. Once again, this periodicity makes intuitive sense, with higher generation in the summer months and lower generation in the winter months.
-![**Solar time series with monthly smoothing**](../figures/solar_monthly.png){width=70%}
+![**Solar time series with monthly smoothing**](../figures/solar_monthly.png){width=80%}
 
 
 *Include plots of key correlated variables*
 *Initial pairs plot to showcase relationship between fossil fuels and renewables followed by individual plots of the more interesting relationships? Due to the high number of points, scatterplots are nearly useless. Should we use an average instead?*
 ```{r pairs plot, echo=FALSE, message=FALSE, warning=FALSE}
-data %>%
-  select(c(3:8,15)) %>%
-  ggpairs(., ggplot2::aes(alpha=0.001))+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+#data %>%
+#  select(c(3:8,15)) %>%
+#  ggpairs(., ggplot2::aes(alpha=0.001))+
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 
