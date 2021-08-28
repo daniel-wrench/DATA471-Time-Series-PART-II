@@ -100,29 +100,40 @@ server <- function(input, output) {
                     generation.marine,
                     generation.hydro.pumped.storage.aggregated,
                     generation.wind.offshore,
-                    forecast.wind.offshore.eday.ahead)) %>% 
-          mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear')) %>% 
+                    forecast.wind.offshore.eday.ahead))
+     
+       # Change to datetime var
+      data$time <- as_datetime(data$time)
+      
+      # Removing outliers
+      outlier_rows <- data[data$time %in% ymd_hms('2017-11-12 20:00:00', '2017-11-14 11:00:00', '2017-11-14 18:00:00'),]
+      
+      outlier_rows[outlier_rows == 0] <- NA
+      
+      data[data$time %in% ymd_hms('2017-11-12 20:00:00', '2017-11-14 11:00:00', '2017-11-14 18:00:00'),] <- outlier_rows
+      
+      
+      data <- data %>% mutate(across(generation.biomass:price.actual, .fns = na_interpolation, option = 'linear')) %>% 
           select(c(1, starts_with("generation")))
-        
+      
+            
         # Giving vars simpler names
         names(data) <- c("time",
-                             "Biomass",
-                             "Lignite",
-                             "Gas",
-                             "Hard Coal",
-                             "Oil",
-                             "Hydro Pumped",
-                             "Hydro River",
-                             "Hydro Reservoir",
-                             "Nuclear",
-                             "Other",
-                             "Other Renewable",
-                             "Solar",
-                             "Waste",
-                             "Wind Onshore")
-        
-        # Change to datetime var
-        data$time <- as_datetime(data$time)
+                           "Biomass",
+                           "Lignite",
+                           "Gas",
+                           "Hard Coal",
+                           "Oil",
+                           "Hydro Pumped",
+                           "Hydro River",
+                           "Hydro Reservoir",
+                           "Nuclear",
+                           "Other",
+                           "Other Renewable",
+                           "Solar",
+                           "Waste",
+                           "Wind Onshore")
+    
         
         # Subset to user selected dates
         data %<>%
