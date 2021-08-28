@@ -105,7 +105,9 @@ After removing the variables that were not relevant to our analysis, and those t
 
 As well as some missing values (discussed further below), we also discovered some outliers. Interestingly, these occurred across variables at the exact same timestamps. Specifically, we identified 3 rows in the raw dataset in which all but one generation source recorded a value of 0. This is shown in the plot below:
 
+<center>
 ![](../figures/strange_zeros.png){width=80%}
+</center>
 
 Because they seem very unlikely to be true values, these outliers were removed. *We also identified two other rows were values were a significant departure from the typical range of that source, but were not equal to zero. These have not been removed because they could be plausible values.*
 
@@ -185,7 +187,7 @@ corrmatrix <- df_corr %>% cor()
 corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", number.cex= 0.7, tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'n')
 ```
 
-Nuclear, the largest overall contributor to electricity generation, is not does not have any significant correlations. Therefore, not only Nuclear an incredibly steady generation source, it is also one that does not depend on or affect the amount of electricity produced by other sources. Solar, on the other hand, is a much more variable source, but this correlation plot shows it is also a very independent generation method.
+Nuclear, the largest overall contributor to electricity generation, does not have any significant correlations. Therefore, not only is Nuclear an incredibly steady generation source, it is also one that does not depend on or affect the amount of electricity produced by other sources. Solar, on the other hand, is a much more variable source, but this correlation plot shows it is also a very independent generation method.
 
 Hydro Pumped is negatively correlated with every other source (apart from Nuclear, with which there is insignificant positive correlation). This is because this source has the full name "pumped hydroelectric energy storage", and this source is used by electric power systems for load balancing. This is where excess or variable electricity is stored and released when demand is high - therefore, generation by this method is higher when other sources are lower.  
 
@@ -197,24 +199,40 @@ The [R Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) accompani
 
 The plot below shows the five sources in the data with the most significant long-term trends over the four-year period. The similar or opposite nature of these trends between these generation sources are reflected in strong positive or negative correlations.
 
+<center>
+
 ![**Biomass, Oil, Other Renewable, Other, and Waste time series with monthly smoothing**](../figures/5_sources.png){width=80%}
+
+</center>
 
 Hard Coal and Hydro River, as shown in the correlation plot, are the two least independent generation sources - in other words, those most related to the values of other sources. The plot below shows some examples of this interdependence, by plotting the variation over time of Hard Coal, Hydro River, and Hydro Reservoir.
 
+<center>
+
 ![**Hard Coal, Hydro Reservoir, and Hydro River time series with quarterly smoothing**](../figures/coal_two_hydros.png){width=80%}
 
-Due to the way the peaks and troughs of each source are either in phase or 180\degrees out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5).
+</center>
+
+Due to the way the peaks and troughs of each source are either in phase or 180\degrees out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.  
 
 The only obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 6am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
 
+<center>
+
 ![**Sample of Solar time series with hourly smoothing**](../figures/solar_hourly.png){width=80%}
 
+</center>
+
 In the next plot we can see that Solar is seasonal on a monthly scale. Electricity generation by solar peaks at around 2000MW in June or July each year, and hits a low of between 800MW and 1000MW in November or December each year. Once again, this periodicity makes intuitive sense, with higher generation in the summer months and lower generation in the winter months.
+
+<center>
+
 ![**Solar time series with monthly smoothing**](../figures/solar_monthly.png){width=80%}
 
+</center>
 
-*Include plots of key correlated variables*
 *Initial pairs plot to showcase relationship between fossil fuels and renewables followed by individual plots of the more interesting relationships? Due to the high number of points, scatterplots are nearly useless. Should we use an average instead?*
+
 ```{r pairs plot, echo=FALSE, message=FALSE, warning=FALSE}
 #data %>%
 #  select(c(3:8,15)) %>%
