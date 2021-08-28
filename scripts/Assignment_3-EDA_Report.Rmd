@@ -52,18 +52,18 @@ data <- unimputed_data %>%
 names(data) <- c("time",
                  "Biomass",
                  "Lignite",
-                             "Gas",
-                             "Hard Coal",
-                             "Oil",
-                             "Hydro Pumped",
-                             "Hydro River",
-                             "Hydro Reservoir",
-                             "Nuclear",
-                             "Other",
-                             "Other Renewable",
-                             "Solar",
-                             "Waste",
-                             "Wind Onshore")
+                 "Gas",
+                 "Hard Coal",
+                 "Oil",
+                 "Hydro Pumped",
+                 "Hydro River",
+                 "Hydro Reservoir",
+                 "Nuclear",
+                 "Other",
+                 "Other Renewable",
+                 "Solar",
+                 "Waste",
+                 "Wind Onshore")
         
 
 data_long <- data %>% pivot_longer(cols = -time, names_to = "generation_source")
@@ -149,10 +149,14 @@ Availability of data and files was ensured through utilizing cloud-based platfor
 ### Means and standard deviations
 
 ```{r summary stats, echo=FALSE}
+# Changing the order of the variables from largest to smallest
 data_table <- data %>% select(c("Nuclear", "Gas", "Wind Onshore", "Hard Coal", "Hydro Reservoir", "Solar", "Hydro River", "Lignite", "Hydro Pumped", "Biomass", "Oil", "Waste", "Other Renewable", "Other"))
-f <- All(data_table) ~ Mean + SD + Min + Median + Max + Histogram
-datasummary(f, data_table, output="markdown")
+# Creating CV statistic function
+CV <- function(x) sd(x)/mean(x)
+f <- All(data_table) ~ Mean + SD + CV + Min + Median + Max + Histogram
+datasummary(f, data_table, output="markdown") # Previously output = "markdown"
 ```
+The table above shows summary statistics for every 
 
 ### Correlations
 
@@ -160,7 +164,9 @@ datasummary(f, data_table, output="markdown")
 #data %>% select(-"time") %>% datasummary_correlation()
 ```
 
-As discussed in the Background section, understanding interdependencies between electricity generation methods is important to maintaining energy availability in the short- and medium-term, but also to manage energy transition in the long-term. In the correlation plot below, we find that two generation sources that are closely related to other sources are Hard Coal and Hydro River. The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem.
+As discussed in the Background section, understanding interdependencies between electricity generation methods is important to maintaining energy availability in the short- and medium-term, but also to manage energy transition in the long-term. In the correlation plot below, we find that two generation sources that are closely related to other sources are Hard Coal, Hydro River, and Other Renewable, which is discussed in more detail below. (In comparison, Nuclear, the largest overall contributor to electricity generation, is not does not have any significant correlations. This supports our finding that Nuclear is an incredibly steady generation method, and one that does not depend on or affect the amount of electricity produced by other methods.) 
+
+The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem.
 
 ```{r, echo=FALSE}
 # Correlation plot
@@ -183,6 +189,7 @@ Solar was an interesting generation source because it displayed seasonality on t
 In the next plot we can see that Solar is seasonal on a quarterly scale,  peaking in the second and third quarters and reaching a low in the third quarter. *Although the seasonality is the tidiest here I'm uncertain talking about quarters - would it be better to simply use the monthly smoothing and talk about that?*
 
 ![**Sample of Solar time series with quarterly smoothing**](../figures/solar_quarterly.png){width=70%}
+
 
 *Include plots of key correlated variables*
 
