@@ -26,6 +26,7 @@ library(modelsummary)
 library(corrplot)
 library(plotly)
 library(timetk)
+library(GGally)
 ```
 
 ```{r data, echo=FALSE}
@@ -210,6 +211,14 @@ In the next plot we can see that Solar is seasonal on a quarterly scale,  peakin
 
 
 *Include plots of key correlated variables*
+*Initial pairs plot to showcase relationship between fossil fuels and renewables followed by individual plots of the more interesting relationships? Due to the high number of points, scatterplots are nearly useless. Should we use an average instead?*
+```{r pairs plot, echo=FALSE, message=FALSE, warning=FALSE}
+data %>%
+  select(c(3:8,15)) %>%
+  ggpairs(., ggplot2::aes(alpha=0.001))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
 
 # Individual contributions
 
