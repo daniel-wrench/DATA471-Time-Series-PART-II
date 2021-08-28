@@ -64,6 +64,37 @@ df <- df %>%
             total.load.actual)) # Removing this one too as we're not analysing it
 ```
 
+We also find three rows where there are anomalous zero values for every generation source apart from Gas. These look as if they should be missing rather than a true 0 value. I've also found two other rows where there is a strange drop off in electricity generation - these were found by calculating the total power for each row, as shown below.
+
+```{r}
+total_power <- df %>% 
+  select(c(1, starts_with("generation"))) %>%
+  pivot_longer(cols = -time, names_to = "generation_source", values_to = 'value') %>%
+  #group_by(generation_source) %>%
+  summarise_by_time(time, .by = 'hour', total_power = sum(value)) %>%
+  arrange(total_power)
+
+boxplot(total_power$total_power, main = 'Box plot of hourly total power')
+total_power #Most extreme values
+```
+
+Here you can see the three rows corresponding to the three most extreme total power values
+```{r}
+df %>% filter_by_time(time, '2017-11-12 20:00:00', '2017-11-14 18:30:00')
+```
+Here the outliers for the 5 most extreme rows are removed (these have been checked visually that they are in fact most likely incorrect measurements)
+
+```{r}
+outlier_rows <- df %>% filter(time %in% ymd_hms('2017-11-12 20:00:00', '2017-11-14 11:00:00', '2017-11-14 18:00:00'))
+
+outlier_rows[outlier_rows == 0] <- NA
+outlier_rows
+
+df[df$time %in% ymd_hms('2017-11-12 20:00:00', '2017-11-14 11:00:00', '2017-11-14 18:00:00'),] <- outlier_rows
+```
+
+
+
 ```{r}
 colSums(is.na(df)) # Number of missing values for each remaining variable
 ```
@@ -94,23 +125,6 @@ ggplot_na_distribution(df$generation.biomass)
 ```
 
 However, this only allows us to look at one variable at a time. There are other functions in the imputeTS package which can be useful for investigating missingness in a (univariate) time series.
-
-We also find three rows where there are anomalous zero values for every generation source apart from Gas. These look as if they should be missing rather than a true 0 value. I've also found two other rows where there is a strange drop off in electricity generation - these were found by calculating the total power for each row, as shown below.
-
-```{r}
-df %>% filter_by_time(time, '2017-11-12 20:00:00', '2017-11-14 18:30:00')
-
-total_power <- df %>% 
-  select(c(1, starts_with("generation"))) %>%
-  pivot_longer(cols = -time, names_to = "generation_source", values_to = 'value') %>%
-  #group_by(generation_source) %>%
-  summarise_by_time(time, .by = 'hour', total_power = sum(value)) %>%
-  arrange(total_power)
-
-total_power
-boxplot(total_power$total_power, main = 'Box plot of hourly total power')
-```
-
 
 We have decided to interpolate the missing values using linear interpolation. The only places where this might be an issue is where are two gaps of length 6 and 8. These will be visualised below.
 
