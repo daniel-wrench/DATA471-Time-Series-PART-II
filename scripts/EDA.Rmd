@@ -1,5 +1,5 @@
 ---
-title: "EDA of Spanish electricity generation time series"
+title: "Draft EDA"
 output:
   html_document:
     df_print: paged
