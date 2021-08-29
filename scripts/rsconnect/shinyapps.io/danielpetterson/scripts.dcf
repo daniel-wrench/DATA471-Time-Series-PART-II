@@ -5,7 +5,10 @@ account: danielpetterson
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4539286
-bundleId: 4965599
+bundleId: 4975926
 url: https://danielpetterson.shinyapps.io/scripts/
-when: 1629946294.23693
-lastSyncTime: 1629946294.23695
+when: 1630205837.65429
+lastSyncTime: 1630205837.6543
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|Assignment_3-EDA_Report.html|Assignment_3-EDA_Report.nb.html|Assignment_3-EDA_Report.Rmd|EDA.html|EDA.Rmd

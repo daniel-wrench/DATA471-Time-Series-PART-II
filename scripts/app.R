@@ -2,12 +2,6 @@
 ### Shiny app to provide interactive EDA of electricity generation ###
 ######################################################################
 
-# ISSUES/FURTHER DEVELOPMENT
-#
-# In sidebar, group renewables and non-renewables under separate headings?
-
-######################################################################
-
 # Load libraries
 library(shiny)
 library(shinydashboard)
@@ -77,30 +71,11 @@ ui <- dashboardPage(
     )
 )
 
-data1 <- read.csv(url("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv"))
+data <- read.csv(url("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset_app.csv"))
 server <- function(input, output) {
   
     # Read in and transform dataset
     df_long <- reactive({
-
-      # Reading from repo URL (this doesn't work for me) 
-      #response <- getURL("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")
-      #data <- read.csv(text = response, header = TRUE) %>%
-      
-      # Bypassing RCurl function (this is much slower for me)
-      #data1 <- read.csv(url("https://raw.githubusercontent.com/danielpetterson/DATA471-Time-Series/main/Data/energy_dataset.csv")) %>%
-      data <- data1 %>%
-      # Alternatively, read using relative file path
-      #data <- read.csv("../data/energy_dataset.csv") %>%
-        
-          select(-c(generation.fossil.coal.derived.gas,
-                    generation.fossil.oil.shale,
-                    generation.fossil.peat,
-                    generation.geothermal,
-                    generation.marine,
-                    generation.hydro.pumped.storage.aggregated,
-                    generation.wind.offshore,
-                    forecast.wind.offshore.eday.ahead))
      
        # Change to datetime var
       data$time <- as_datetime(data$time)
