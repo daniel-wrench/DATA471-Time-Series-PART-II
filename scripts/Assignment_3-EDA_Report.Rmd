@@ -205,13 +205,8 @@ The plot below shows the five sources in the data with the most significant long
 
 </center>
 
-Hard Coal and Hydro River, as shown in the correlation plot, are the two least independent generation sources - in other words, those most related to the values of other sources. The plot below shows some examples of this interdependence, by plotting the variation over time of Hard Coal, Hydro River, and Hydro Reservoir.
+Hard Coal and Hydro River, as shown in the correlation plot, are the two least independent generation sources - in other words, those most related to the values of other sources. The plot below shows some examples of this interdependence, by plotting the mean-centered variation over time of Hard Coal, Hydro River, and Hydro Reservoir.
 
-<center>
-
-![**Hard Coal, Hydro Reservoir, and Hydro River time series with quarterly smoothing**](../figures/coal_two_hydros.png){width=80%}
-
-*Alternate presentation with mean centered values and monthly smoothing*
 ```{r mean centered}
 center_scale <- function(x) {
   scale(x, scale=FALSE)
@@ -236,7 +231,7 @@ ggplot(data_centered)+
 
 </center>
 
-Due to the way the peaks and troughs of each source are either in phase or 180\degrees out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.  
+Due to the way the peaks and troughs of each source are either in phase or 180$^\circ$ out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.  
 
 The only obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 6am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
 
