@@ -145,7 +145,7 @@ server <- function(input, output) {
         ggtitle("Power Generation by Method (MW)") +
         ylab("Power Generated") +
         xlab("Time") +
-        scale_color_discrete(name = "Generation\nMethod") +
+        scale_colour_viridis_d(name = "Generation\nMethod")+
         theme(plot.title = element_text(hjust = 0.5),panel.background = element_rect(fill = 'white', color = 'white')) 
       
       if (input$vis_select == "Overlaid") {
