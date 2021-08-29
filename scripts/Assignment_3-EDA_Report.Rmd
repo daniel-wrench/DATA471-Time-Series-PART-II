@@ -85,7 +85,7 @@ Daniel Petterson (300467629), Rob Tomkies (300588353), and Daniel Wrench (300398
 
 **Due 5pm Tuesday 31st August**
 
-**This report is accompanied by an online dashboard, developed in R Shiny.** This is available *at the following link/by running the app.R file*. The app allows interactive visualisation of electricity generation over time, and is discussed in greater detail in the section [Variation over time].
+This report is accompanied by an [online dashboard](https://danielpetterson.shinyapps.io/scripts/), developed in R Shiny. The app allows interactive visualisation and comparison of each time series, and is discussed in greater detail in the section [Time series visualisation].
 
 # Background and Data
 
