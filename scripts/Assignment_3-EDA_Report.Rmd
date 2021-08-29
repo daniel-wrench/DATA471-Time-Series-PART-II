@@ -81,7 +81,7 @@ names(data) <- c("time",
 data_long <- data %>% pivot_longer(cols = -time, names_to = "generation_source")
 ```
 
-Daniel Patterson (300467629), Rob Tomkies (300588353), and Daniel Wrench (300398222)
+Daniel Petterson (300467629), Rob Tomkies (300588353), and Daniel Wrench (300398222)
 
 **Due 5pm Tuesday 31st August**
 
@@ -211,6 +211,29 @@ Hard Coal and Hydro River, as shown in the correlation plot, are the two least i
 
 ![**Hard Coal, Hydro Reservoir, and Hydro River time series with quarterly smoothing**](../figures/coal_two_hydros.png){width=80%}
 
+*Alternate presentation with mean centered values and monthly smoothing*
+```{r mean centered}
+center_scale <- function(x) {
+  scale(x, scale=FALSE)
+}
+
+data_centered <- data %>%
+  select(c("Hard Coal", "Hydro Reservoir", "Hydro River")) %>%
+  mutate_all(., center_scale) %>%
+  mutate(time = data$time) %>%
+  pivot_longer(cols = -time, names_to = "generation_source") %>% 
+  group_by(generation_source) %>% 
+  summarise_by_time(time, .by = "monthly", adjusted = mean(value))
+
+ggplot(data_centered)+
+  geom_line(aes(x=time, y=adjusted, color=generation_source))+
+  geom_hline(yintercept=0, linetype="dashed")+
+  labs(x="Time", y="Difference from Mean (MW)", title="Mean Centered Variation Over Time")+
+  scale_color_discrete(name = "Generation\nMethod") +
+  theme(plot.title = element_text(hjust = 0.5),panel.background = element_rect(fill = 'white', color = 'white')) 
+```
+
+
 </center>
 
 Due to the way the peaks and troughs of each source are either in phase or 180\degrees out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.  
@@ -231,14 +254,6 @@ In the next plot we can see that Solar is seasonal on a monthly scale. Electrici
 
 </center>
 
-*Initial pairs plot to showcase relationship between fossil fuels and renewables followed by individual plots of the more interesting relationships? Due to the high number of points, scatterplots are nearly useless. Should we use an average instead?*
-
-```{r pairs plot, echo=FALSE, message=FALSE, warning=FALSE}
-#data %>%
-#  select(c(3:8,15)) %>%
-#  ggpairs(., ggplot2::aes(alpha=0.001))+
-#  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
 
 
 # Individual contributions
