@@ -33,7 +33,7 @@ library(GGally)
 df <- read.csv("../data/energy_dataset.csv")
 
 # Change to datetime var
-df$time <- as_datetime(df$time)
+df$time <- as_datetime(df$time, tz="CET")
 
 # Removing variables with no values
 unimputed_data <- df %>%

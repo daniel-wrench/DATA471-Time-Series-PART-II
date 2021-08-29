@@ -78,7 +78,7 @@ server <- function(input, output) {
     df_long <- reactive({
      
        # Change to datetime var
-      data$time <- as_datetime(data$time)
+      data$time <- as_datetime(data$time, tz="CET")
       
       # Removing outliers
       outlier_rows <- data[data$time %in% ymd_hms('2017-11-12 20:00:00', '2017-11-14 11:00:00', '2017-11-14 18:00:00'),]

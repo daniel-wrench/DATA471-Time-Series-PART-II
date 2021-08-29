@@ -35,7 +35,7 @@ df <- read.csv("../data/energy_dataset.csv")
 # Formatting time variable to datetime object
 # NB:  Time contains both UTC+1 and UTC+2 time-zones - date functions automatically pick this up and convert to UTC
 
-df$time <- as_datetime(df$time)
+df$time <- as_datetime(df$time, tz="CET")
 head(df)
 ```
 
