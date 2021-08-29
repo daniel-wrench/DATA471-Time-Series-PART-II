@@ -29,7 +29,7 @@ library(timetk)
 library(GGally)
 ```
 
-```{r data, echo=FALSE}
+```{r data, echo=FALSE, message=FALSE, warning=FALSE}
 df <- read.csv("../data/energy_dataset.csv")
 
 # Change to datetime var
@@ -233,7 +233,7 @@ ggplot(data_centered)+
 
 Due to the way the peaks and troughs of each source are either in phase or 180$^\circ$ out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.  
 
-The only obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 6am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
+The only obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 8am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
 
 <center>
 
