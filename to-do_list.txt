@@ -1,5 +1,4 @@
 TO-DO LIST
 
--Fix online version of Shiny app, or direct to app.R file in report
 -Confirm decision on keeping non-zero outliers
 -Write individual contributions and brief conclusion
