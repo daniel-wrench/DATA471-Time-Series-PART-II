@@ -103,9 +103,9 @@ The question we formulated to guide our EDA is as follows:
 This question is worth investigating due to the pressing global challenge of climate change, and the consequent need for countries to transition to a sustainable energy economy. In order for this to be possible, we need to understand how electricity is currently being generated and what the long-term trends are, to see whether a nation's energy policy should continue or diverge from the current trajectory. Furthermore, governments need to know how electricity generation sources vary seasonally and what interdependencies there are.
 
 
-After removing the variables that were not relevant to our analysis, and those that contained no observations, the dataset contained hourly recordings of the amount of power generated from 14 different sources in Spain between 2015 and 2019. The definitions of each of these sources are reasonably self-explanatory, and we have expanded in further detail during our analysis when it is helpful.
+After removing the variables that were not relevant to our analysis, and those that contained no observations, the dataset contained hourly recordings of the amount of power generated from 14 different sources (solar, nuclear, etc.) in Spain between 2015 and 2019. This equates to about 35,000 observations for each source. 
 
-As well as some missing values (discussed further below), we also discovered some outliers. Interestingly, these occurred across variables at the exact same timestamps. Specifically, we identified 3 rows in the raw dataset in which all but one generation source recorded a value of 0. This is shown by the three negative spikes in the plot below:
+As well as some missing values (discussed further below), we discovered some outliers in the data. Interestingly, these occurred across variables at the exact same timestamps. We identified 3 rows in the raw dataset in which all but one generation source recorded a value of 0. This is shown by the three negative spikes in the plot below:
 
 <center>
 ![](../figures/strange_zeros.png){width=80%}
@@ -165,7 +165,10 @@ Availability of data and files was ensured through utilizing cloud-based platfor
 
 # Exploratory Data Analysis
 
-*3-8 pages, 15 marks*
+In the first section, [Overall statistics], we look at statistics for each source over the entire time series, and calculate correlations between sources.
+
+In the second section, [Time series visualisation], we investigate some of these correlations, using charts to compare how different sources vary over time with respect to one another. Here we also examine interesting long-term trends and seasonality.
+
 
 ## Overall statistics
 
@@ -177,9 +180,9 @@ CV <- function(x) sd(x)/mean(x)
 f <- All(data_table) ~ Mean + SD + CV + Min + Median + Max + Histogram
 datasummary(f, data_table, output="markdown") # Previously output = "markdown"
 ```
-The table above shows summary statistics for every generation source in the dataset, ordered from largest to smallest mean hourly value. This allows a quick comparison of the magnitude and variability of each source. We can see that Nuclear has the largest average hourly generation, but a relatively low standard deviation. This combination of high production and low variability, an important measure for understanding an electricity system, is best summarised by the coefficient of variation (CV) statistic. Nuclear has the lowest CV out of all sources. This statistic helps us understand the difference between intermittent sources (high CV, such as Solar and Wind Onshore), and continuous sources (low CV, such as Nuclear, Oil, and Gas).
+The table above shows summary statistics for every generation source in the dataset, ordered from largest to smallest mean hourly value. This allows a quick comparison of the magnitude and variability of each source. Of the top 5 sources, two are fossil-fuel based (Gas and Hard Coal). Nuclear is a unique source in that it has the largest average hourly generation, but a relatively low standard deviation, compared to other major sources. This combination of high mean and low variability is best summarised by the coefficient of variation (CV) statistic. Nuclear has the lowest CV out of all sources. Wind Onshore has the largest variability in hourly output, followed by Gas. Solar, however, is a source with very strong seasonality, and this is shown by its higher CV than both Wind Onshore and Gas.
 
-As discussed in the Background section, understanding interdependencies between electricity generation sources is important to maintaining energy availability in the short- and medium-term, but also to manage energy transition in the long-term. We calculated correlations as a way of investigating relationships in the dataset.
+As discussed in the Background section, understanding interdependencies between electricity generation sources is important to maintaining energy availability in the short- and medium-term, but also to manage energy transition in the long-term. We calculated Pearson correlation coefficients as a way of investigating linear associations in the dataset. (NB: Due to the autocorrelation properties of time series data, these should be interpreted with caution, but can still give insights into associations.)
 
 ```{r correlation plot, echo=FALSE, warning=FALSE}
 # Correlation plot
@@ -189,19 +192,23 @@ corrmatrix <- df_corr %>% cor()
 corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", number.cex= 0.7, tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'n')
 ```
 
-Nuclear, the largest overall contributor to electricity generation, does not have any significant correlations. Therefore, not only is Nuclear an incredibly steady generation source, it is also one that does not depend on or affect the amount of electricity produced by other sources. Solar, on the other hand, is a much more variable source, but this correlation plot shows it is also a very independent generation method.
+Nuclear, the largest overall contributor to electricity generation, does not have any significant correlations (here defined as correlations with absolute value greater than 0.3). Therefore, not only is Nuclear an incredibly steady generation source, it is also one that does not obviously depend on or affect the amount of electricity produced by other sources. Solar, on the other hand, is a much more variable source, but this correlation also has no significant correlations, showing it is also a very independent generation method.
 
-The three least independent generation sources - those most related to other sources - are Hard Coal, Hydro River, and Other Renewable. The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem. Other correlations are investigated further in the discussion of the time series plots in the next section.
+Three generation sources that are very *dependent*, or closely related to other sources, are Hard Coal, Hydro River, and Other Renewable. The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem. Other correlations are investigated further in the discussion of the time series plots in the next section.
 
 ## Time series visualisation
 
 The [R Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) accompanies this section of the EDA. The dashboard allows interactive exploration of each electricity generation source over time, with customisation of which time period to look at, how much to smooth the data, and how to compare the variables. Here, we focus on the most interesting patterns.
 
-The plot below shows the five sources in the data with the most significant long-term trends over the four-year period. The similar or opposite nature of these trends between these generation sources are reflected in strong positive or negative correlations.
+The plot below shows the five sources with the greatest long-term change over the four-year period. There five sources also happen to have the lowest mean hourly values of the 14 studied in this dataset.
+Biomass, Oil, and Other generation sources all show a rapid decrease from a high in 2015 to a low in early 2016, with monthly averages remaining around this low for the remainder of the series. On the other hand, Waste and Other renewable sources show a sustained increase from 2015 to early 2017, and monthly averages reaming around this high value for the remainder of the series. 
+The similar or opposite nature of the trends between these generation sources are reflected in strong positive or negative correlations. For example, Biomass and Other sources have the strongest positive linear association of any two sources in the data, with a correlation of 0.66. Meanwhile, the opposing trends mean that Biomass and Other renewable sources have the strongest negative linear association of any two sources, with a correlation of 0.56.
+
+Unlike with Hard Coal and Lignite, or Hydro River and Hydro Reservoir, it is not immediately obvious why these sources follow similar or opposite trends. Also, due to their low contribution to overall electricity generation, these marked long-term trends do not have a large effect on total energy output.
 
 <center>
 
-![**Biomass, Oil, Other Renewable, Other, and Waste time series with monthly smoothing**](../figures/5_sources.png){width=80%}
+![**Monthly averages of Biomass, Oil, Other Renewable, Other, and Waste**](../figures/5_sources.png){width=80%}
 
 </center>
 
@@ -237,7 +244,7 @@ The only obvious seasonality we detected was for Solar generation. In fact, Sola
 
 <center>
 
-![**Sample of Solar time series with hourly smoothing**](../figures/solar_hourly.png){width=80%}
+![**A subset of hourly averages of a subset of Solar**](../figures/solar_hourly.png){width=80%}
 
 </center>
 
@@ -245,7 +252,7 @@ In the next plot we can see that Solar is seasonal on a monthly scale. Electrici
 
 <center>
 
-![**Solar time series with monthly smoothing**](../figures/solar_monthly.png){width=80%}
+![**Monthly averages of Solar**](../figures/solar_monthly.png){width=80%}
 
 </center>
 
@@ -285,3 +292,9 @@ Daniel W:
 - Proof-read and edited Ethics, Privacy and Security section.
 
 # Conclusion
+An Exploratory Data Analysis of electricity generation in Spain between 2015 and 2018 was conducted to investigate how the generation by different sources has changed over time. This dataset required cleaning of a small number of missing values and outliers, which were filled in by linear interpolation. 
+We found that nuclear is the most important generation source over the period, not only due to its high mean output but also its low variability. A number of low-output sources showed significant long-term change in their average output. Seasonality was observed in solar generation (on two scales), and to a lesser extent in hydroelectric sources.
+This analysis could help inform government policy around clean energy investment, and there were some concerns around ethical implications of how this research could affect future policy around climate change and affordable energy. 
+
+
+
