@@ -56,6 +56,10 @@ ui <- dashboardPage(
                         c("Overlaid",
                           "Side-by-side"
                         )),
+            selectInput("center", "Y Values",
+                        c("Raw",
+                          "Mean Centered"
+                        )),
           conditionalPanel(
             "input.vis_select == 'Side-by-side'",
             selectInput("y_scale_select", "Y Scale",
@@ -108,6 +112,17 @@ server <- function(input, output) {
                            "Solar",
                            "Waste",
                            "Wind Onshore")
+        
+        # Mean center data
+        center_scale <- function(x) {
+          scale(x, scale=FALSE)
+        }
+        
+        if (input$center == "Mean Centered") {
+        data %<>%
+          mutate_all(., center_scale) %>%
+          mutate(time = data$time)
+        }
     
         
         # Subset to user selected dates
@@ -115,6 +130,7 @@ server <- function(input, output) {
           filter(time >= as_datetime(input$date_select[1])) %>%
           filter(time <= as_datetime(input$date_select[2])) %>%
           pivot_longer(cols = -time, names_to = "generation_source")
+        
 
         # Subset to selected generation methods
         if(length(input$gen_method_select) > 0) {
@@ -142,8 +158,8 @@ server <- function(input, output) {
       
       plot1 <- ggplot(data=plot1_data) + 
         geom_line(aes(x = time, y = adjusted, color = generation_source), stat = "identity", lwd = 1, alpha = 0.8) +
-        ggtitle("Power Generation by Method (MW)") +
-        ylab("Power Generated") +
+        ggtitle("Power Generation by Method") +
+        ylab("Power Generated (MW)") +
         xlab("Time") +
         scale_colour_viridis_d(name = "Generation\nMethod")+
         theme(plot.title = element_text(hjust = 0.5),panel.background = element_rect(fill = 'white', color = 'white')) 
@@ -159,6 +175,13 @@ server <- function(input, output) {
          theme(legend.position="none") +
          facet_wrap(~generation_source, scales = "free_y")
      }
+      
+      if (input$center == "Mean Centered") {
+        plot1 <-plot1+
+          geom_hline(yintercept=0, linetype="dashed")+
+          labs(x="Time", y="Difference from Mean (MW)", title="Mean Centered Variation Over Time")
+      }
+      
       # Adjust output size
       ggplotly(plot1) %>%
        layout(autosize = T, width = NULL, height = 600, margin = m)

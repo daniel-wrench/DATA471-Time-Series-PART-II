@@ -1,12 +1,13 @@
 ---
 title: "EDA of Spanish electricity generation 2015-2018"
-subtitle: 'Group 17: Time Series - Assignment 3 - EDA Report'
+subtitle: 'Group 16: Time Series - Assignment 3 - EDA Report'
 output:
   html_document:
     toc: yes
     toc_depth: 2
     fig_caption: yes
   pdf_document:
+    latex_engine: xelatex
     toc: no
     toc_depth: '2'
 ---
@@ -25,7 +26,6 @@ library(modelsummary)
 library(corrplot)
 library(plotly)
 library(timetk)
-#library(GGally)
 ```
 
 ```{r data, echo=FALSE, message=FALSE, warning=FALSE}
