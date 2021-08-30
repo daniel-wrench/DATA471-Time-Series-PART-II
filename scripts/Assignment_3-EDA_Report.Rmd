@@ -272,7 +272,7 @@ In the next plot we can see that Solar is also seasonal on a monthly scale. Elec
 
 </center>
 
-Although an early pioneer in renewable energy, changes in government policy including the reduction of financial incentives stymied the growth of renewable energy capacity in the country. This is especially true for solar power plants which have remained at a similar generation capacity between 2011 and 2017 [@GURTLER2019110881].
+From background research we learnt that although Spain was an early pioneer in renewable energy, changes in government policy, including the reduction of financial incentives, have stymied the growth of renewable energy capacity in the country. This is especially true for solar power plants which have remained at a similar generation capacity between 2011 and 2017 [@GURTLER2019110881].
 
 ```{r solar daily total}
 data %>%
@@ -288,9 +288,9 @@ data %>%
   theme(plot.title = element_text(hjust = 0.5),panel.background = element_rect(fill = 'white', color = 'white')) 
 ```
 
-From the above plot we can see that total daily power generated from photovoltaic solar systems shows little change across the years we investigated. The similarity of high peaks in winter and summer is likely due to almost all of the solar generation capacity in Spain being photovoltaic rather than thermal. While there are less sunlight hours in winter the amount and intensity of sun would be similar in the middle of the day, in fact in the high heats present in Spain during summer, solar panels are less efficient, however no clear evidence for this translated in to the data.
+From the above plot we can see that total daily power generated from photovoltaic solar systems shows little change across the years we investigated. The similarity of high peaks in winter and summer is likely due to almost all of the solar generation capacity in Spain being photovoltaic rather than thermal: while there are less sunlight hours in winter, the amount and intensity of sun would be similar in the middle of the day. In fact, solar panels are less efficient in the high temperatures of Spanish summers, but no clear evidence for this was found in the data.
 
-While other seasonal effects are less clear, by deconstructing the signal, overarching trends, variance and some degree of seasonality can be found in most of the data. Below the signal decomposition for our natural hydro sources is shown. A clear, yearly seasonal cycle is shown, likely demonstrating the existence of a wet and dry season in Spain. On top of this a repeated monthly spike and drop is seen, likely due to some form of maintenance cycle.By overlaying the smoothed seasonal variation with Solar, we can see that they are roughly antiphased. While this will help to provide a constant year round supply, the magnitude difference suggests that there will be some residual seasonal signal present in the other generation sources given the assumption of constant year round generation of electricity. This is seen in further signal decomposition and would help to explain the strong negative correlation between hydro sources and many hydrocarbon energy sources.
+While other seasonal effects are less clear, by deconstructing the signal we could find overarching trends, variance, and some degree of seasonality in most of the data. The signal decomposition for our natural hydro sources is shown below. A clear, yearly seasonal cycle is shown, likely demonstrating the existence of a wet and dry season in Spain. On top of this a repeated monthly spike and drop is seen, likely due to some form of maintenance cycle. By overlaying the smoothed seasonal variation with Solar, we can see that they are roughly antiphased. While this will help to provide a constant year round supply, the magnitude difference suggests that there will be some residual seasonal signal present in the other generation sources given the assumption of constant year round generation of electricity. This is seen in further signal decomposition and would help to explain the strong negative correlation between hydro sources and many hydrocarbon energy sources.
 
 <center>
 
@@ -383,3 +383,5 @@ Daniel W:
 # Conclusion
 
 An Exploratory Data Analysis of electricity generation in Spain between 2015 and 2018 was conducted to investigate how the generation by different sources has changed over time. This dataset required cleaning of a small number of missing values and outliers, which were filled in by linear interpolation. We found that nuclear is the most important generation source over the period, not only due to its high mean output but also its low variability. A number of low-output sources showed significant long-term change in their average output. Seasonality was observed in solar generation (on two scales), and to a lesser extent in hydroelectric sources. The overall generation amount remained roughly constant for Spain and as such this seasonality induced echo seasonality in some of the fossil fuel sources. This analysis could help inform government policy around clean energy investment, and there were some concerns around ethical implications of how this research could affect future policy around climate change and affordable energy.
+
+# References
