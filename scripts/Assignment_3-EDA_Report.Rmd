@@ -360,12 +360,15 @@ Daniel P:
 
 - Repo Manager 
 - Built Shiny app to allow for interactive exploration of data
+- wider literature review
 
 Rob:
 
 - timeline/project manager
-- Data analyis
+- Data analysis
 - Ethics, privacy and security
+- wider literature review
+- shiny app code review
 - Team Mascot 
 
 Daniel W:
@@ -374,8 +377,9 @@ Daniel W:
 - Investigated and wrote about outliers and effect of linear interpolation
 - Investigated and wrote about correlations, long-term trends and seasonality 
 - Proof-read and edited Ethics, Privacy and Security section.
+- wider literature review
 
 # Conclusion
 An Exploratory Data Analysis of electricity generation in Spain between 2015 and 2018 was conducted to investigate how the generation by different sources has changed over time. This dataset required cleaning of a small number of missing values and outliers, which were filled in by linear interpolation. 
-We found that nuclear is the most important generation source over the period, not only due to its high mean output but also its low variability. A number of low-output sources showed significant long-term change in their average output. Seasonality was observed in solar generation (on two scales), and to a lesser extent in hydroelectric sources.
+We found that nuclear is the most important generation source over the period, not only due to its high mean output but also its low variability. A number of low-output sources showed significant long-term change in their average output. Seasonality was observed in solar generation (on two scales), and to a lesser extent in hydroelectric sources. The overall generation amount remained roughly constant for Spain and as such this seasonality induced echo seasonality in some of the fossil fuel sources. 
 This analysis could help inform government policy around clean energy investment, and there were some concerns around ethical implications of how this research could affect future policy around climate change and affordable energy. 
