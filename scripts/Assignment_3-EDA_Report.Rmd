@@ -344,7 +344,7 @@ cbind(data[1], prop.table(as.matrix(fossil), margin = 1)) %>%
 
 *1 page, 2 marks*
 
-The structure and responsibilities of our team were initially defined as follows:
+As discussed in assignment 2, each member independently researched topics for the project which were then discussed and ranked through preferences of topicality, relevance, data quality and interest, before conducting an ideas session to develop and refine an initial investigation question. The structure and responsibilities of our team were then assigned as shown below. Following this the investigation proper was conducted, consisting of data analysis and literature review. Each member participated in weekly team meetings which were in person at first, before the covid lock down, at which point communications were shifted to an online platform. Outside of these meetings collaboration continued through discussion on Teams Chat as well as commenting throughout code and report.
 <center>
 
 ![](../figures/team_roles.png){width="80%"}
@@ -355,7 +355,7 @@ In addition to these, each member of the team carried out a variety of other fun
 
 *Quick bullet points before writing up*
 
-As discussed in assignment 2, each member independently researched topics for the project which were then discussed and ranked through preferences of topicality, relevance, data quality and interest, before conducting an ideas session to develop and refine an initial investigation question. At this stage team roles were assigned, as discussed below, and the investigation proper was conducted, consisting of data analysis and literature review. Each member participated in weekly team meetings which were in person at first, before the covid lock down, at which point communications were shifted to an online platform. Outside of these meetings collaboration continued through discussion on Teams Chat as well as commenting throughout code and report.
+
 
 Daniel P:
 
