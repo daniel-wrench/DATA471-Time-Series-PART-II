@@ -44,6 +44,7 @@ dim(df) # Number of rows and columns
 ```
 
 ```{r}
+names(df)
 summary(df) # Distribution and missingness for each variable
 ```
 
@@ -76,6 +77,7 @@ total_power <- df %>%
 
 boxplot(total_power$total_power, main = 'Box plot of hourly total power')
 total_power #Most extreme values
+  
 ```
 
 Here you can see the three rows corresponding to the three most extreme total power values
@@ -159,6 +161,8 @@ ggplot(data = df_clean[90:150,]) + geom_line(aes(x=time, y = generation.biomass,
 
 And in the other dataset, not yet loaded: hourly weather data over the same period for a number of Spanish cities
 
+
+
 ### Investigating generation methods
 
 ```{r}
@@ -191,6 +195,23 @@ long_gen_data <- gen_data  %>%
 
 head(long_gen_data)
 ```
+
+### Investigating total generation over time
+```{r}
+total_power <- long_gen_data %>% ungroup() %>%
+  summarise_by_time(time, .by = 'hour', total_power = sum(value)) %>%
+  arrange(total_power)
+
+boxplot(total_power$total_power, main = 'Box plot of hourly total power')
+total_power #Most extreme values
+
+total_power %>%
+  summarise_by_time(time, .by = 'month', adjusted = sum(total_power)) %>% 
+ plot_time_series(time, adjusted, .title = 'Total power generated each month, all sources', .y_lab = 'Power (MW)')
+  #plot_seasonal_diagnostics(time, adjusted)
+  #ggplot() + geom_line(aes(x = time, y = adjusted)) + ylim(0, 2.5e7)
+```
+
 
 #### Overall statistics
 
@@ -243,19 +264,39 @@ gen_data_smoothed %>%
 
 gen_data_smoothed %>% 
   filter(generation_source %in% sources_by_sum$generation_source[7:14]) %>% 
-  plot_time_series(time, adjusted, .facet_ncol = 3,
+  plot_time_series(time, adjusted, .facet_ncol = 3, .line_size = 0.01,
                    .smooth_period = "12 months", .facet_scales='fixed',
                    .title= "Weekly averages for six smallest generation sources + 12-month smoothing")
 ```
+
+```{r}
+gen_data_smoothed %>% 
+  filter(generation_source %in% sources_by_sum$generation_source[1:6]) %>% 
+  ggplot() + geom_smooth(aes(x = time, y = adjusted), method = 'loess', span = 0.7, se = FALSE)  + facet_wrap(~generation_source, scales = 'fixed')
+
+gen_data_smoothed %>% 
+  filter(generation_source %in% sources_by_sum$generation_source[7:14]) %>% 
+  ggplot() + geom_smooth(aes(x = time, y = adjusted), method = 'loess', span = 0.7, se = FALSE)  + facet_wrap(~generation_source, scales = 'fixed')
+```
+
 
 These plots emphasise the relatively steady week-to-week electricity generation from nuclear over the time period, compared with the high variability in wind and gas (note that each row has the same y-axis). Solar shows a strong seasonal pattern within each year, peaking in July (summer) and reaching a low in December (winter) each year. All hydro sources appears to show seasonality on a two-year scale.
 
 In terms of long-term trends, biomass, oil, and "other" all show a similar decrease in production at the start of 2016, followed by a steady period until the end of the series. Meanwhile, Waste and Other Renewable show a similar increasing trend over the four year period. Gas increases slightly, whereas Hard Coal decreased slightly. Nuclear, Wind, Solar, Lignite, and all Hydro sources are steady.
 
+```{r}
+daily_totals <- long_gen_data %>%
+  summarise_by_time(time, .by = 'day', total = sum(value))
+
+daily_totals %>% filter(generation_source=='Solar') %>%
+  plot_time_series(time, total, .smooth_period = 'quarter')
+```
+
+
 #### Stacked area plots
 
 ```{r}
-long_gen_data %>% 
+long_gen_data %>%
   summarise_by_time(time, .by = '3 months', adjusted = mean(value)) %>% 
   ggplot() + 
   geom_area(aes(x = time, y = adjusted, fill = generation_source), stat = "identity")
