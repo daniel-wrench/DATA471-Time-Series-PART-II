@@ -343,6 +343,8 @@ cbind(data[1], prop.table(as.matrix(fossil), margin = 1)) %>%
 
 *Quick bullet points before writing up*
 
+As discussed in assignment 2, each member independently researched topics for the project which were then discussed and ranked through preferences of topicality, relevance, data quality and interest, before conducting an ideas session to develop and refine an initial investigation question. At this stage team roles were assigned, as discussed below, and the investigation proper was conducted, consisting of data analysis and literature review. Each member participated in weekly team meetings which were in person at first, before the covid lock down, at which point communications were shifted to an online platform. Outside of these meetings collaboration continued through discussion on Teams Chat as well as commenting throughout code and report.
+
 Daniel P:
 
 -   Repo Manager
@@ -351,12 +353,11 @@ Daniel P:
 
 Rob:
 
--   timeline/project manager
--   Data analysis
--   Ethics, privacy and security
--   wider literature review
--   shiny app code review
--   Team Mascot
+Rob took on the role of timeline/project manager. This initially involved the set up of the online work space in Microsoft Teams, including the Kandban  board and project timeline in the form of Gantt Charts. These were maintained throughout the project, updating with new tasks and marking as in progress or complete so that progress could be quantified, ensuring the project remained on track. The workspace also brought in polls for when to have meetings and easy access to both the Git repository and overleaf.
+
+Rob conducted both wider literature review and data analysis. The literature review focused primarily on the political environment present in Spain at the time to better understand some of the drivers for the trends seen. Further to this he examined different energy time series analysis studies and the techniques utilised within them to help inform the most appropriate approached to apply to this study. His analysis focused on the seasonal decomposition and trend isolation within the data as well as a distribution analysis to examine the behavior of the sources independently within the time series.
+
+Beyond this, Rob took responsibility for the consideration and write up of ethics, privacy and security concerns relating to this project as well as contributing towards the data analysis write up, and reviewing the some of the Shiny app code.
 
 Daniel W:
 
