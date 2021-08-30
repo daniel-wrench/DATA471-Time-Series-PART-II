@@ -414,7 +414,7 @@ load_vs_forecast %>%
 ##### Daily averages
 
 ```{r, include=TRUE, fig.width = 14, fig.height = 36, warning=FALSE, message = FALSE}
-datain <- long_gen_data %>% group_by(generation_source, year, day, month) %>% summarise(across(c(value), c(max, min)))
+datain <- long_gen_data %>% group_by(generation_source, year, day, month) %>% summarise(across(c(value), c(max, min, mean)))
 
 datain <- datain %>%
   mutate(date = make_date(year, month, day))
@@ -424,7 +424,90 @@ for(i in 1:length(names)){
   datain2 <- filter(datain, generation_source == names[i])
   p[[i]] <- datain2 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+theme(legend.position="bottom")+ggtitle(names[i])+
   stat_smooth(formula = y ~ x,method = "loess", col = "red",aes(x = date, y = value_1))+
-  stat_smooth(formula = y ~ x, method = "loess", col = "blue",aes(x = date, y = value_2))
+  stat_smooth(formula = y ~ x, method = "loess", col = "blue",aes(x = date, y = value_2)) + stat_smooth(formula = y ~ x, method = "loess", col = "green",aes(x = date, y = value_3))
+
+}
+
+do.call(grid.arrange,c(p,ncol=2))
+```
+```{r, include=TRUE, fig.width = 14, fig.height = 30, warning=FALSE, message = FALSE}
+library(seastests)
+library(ggfortify)
+library(zoo)
+library(tseries)
+library(astsa)
+library(BBmisc)
+library(forecast)
+library(ggplot2)
+datain <- long_gen_data %>% group_by(generation_source, year, month, day) %>% summarise(across(c(value), c(max, min, mean)))
+datain <- datain %>%
+  mutate(date = make_datetime(year, month, day))
+p <- list()
+names <- unique(datain$generation_source)
+for(i in 1:length(names)){
+  datain2 <- filter(datain, generation_source == names[i])
+  print(datain2$generation_source[1])
+  Vector1<-ts(as.numeric(datain2$value_3), frequency = 365, start = c(2015, 1))
+  decomposed<-decompose(Vector1,type='additive')
+  p[[i]] <- autoplot(decomposed) + ggtitle(names[i] )
+}
+do.call(grid.arrange,c(p,ncol=3)) 
+
+
+
+```
+```{r, include=TRUE, fig.width = 14, fig.height = 6, warning=FALSE, message = FALSE}
+library(seastests)
+library(ggfortify)
+library(zoo)
+library(tseries)
+library(astsa)
+library(BBmisc)
+library(forecast)
+library(ggplot2)
+datain <- long_gen_data %>% group_by(generation_source, year, month, day) %>% summarise(across(c(value), c(max, min, mean)))
+datain <- datain %>%
+  mutate(date = make_datetime(year, month, day))
+p <- list()
+names <- unique(datain$generation_source)
+temp <- list()
+for(i in 1:length(names)){
+  datain2 <- filter(datain, generation_source == names[i])
+  print(datain2$generation_source[1])
+  Vector1<-ts(as.numeric(datain2$value_3), frequency = 365, start = c(2015, 1))
+  decomposed<-decompose(Vector1,type='additive')
+  summary(decomposed)
+  temp[[i]] <- decomposed$trend
+  p[[i]] <- autoplot(decomposed) + ggtitle(names[i] )
+}
+
+temp[[]] %>% 
+  ggplot()+
+  geom_line(aes(x = 1:length(temp[[2]]), y = normalize(as.numeric(temp[[2]]), method = "standardize", range = c(0, 1)), color = "Gas"))+
+  geom_line(aes(x = 1:length(temp[[4]]), y = normalize(as.numeric(temp[[4]]), method = "standardize", range = c(0, 1)), color = "Hard Coal"))+
+  geom_line(aes(x = 1:length(temp[[9]]), y = normalize(as.numeric(temp[[9]]), method = "standardize", range = c(0, 1)), color = "Lignite"))+
+  geom_line(aes(x = 1:length(temp[[11]]), y = normalize(as.numeric(temp[[11]]), method = "standardize", range = c(0, 1)), color = "Oil")) + xlab("Day from start") + ylab("Normalised Power Generated")
+
+
+
+```
+
+Worth re looking at hydro pumped - overall generation has remained constant while article read suggests that energy demand has gone up - could this be a good indicator of energy surplus? Explains why there would be a downward trend. (names[8], val3)
+
+
+```{r, include=TRUE, fig.width = 14, fig.height = 36, warning=FALSE, message = FALSE}
+
+datain <- long_gen_data %>% group_by(generation_source, year, day, month) %>% summarise(across(c(value), c(max, min, mean)))
+
+datain <- datain %>%
+  mutate(date = make_date(year, month, day))
+p <- list()
+names <- unique(datain$generation_source)
+for(i in 1:length(names)){
+  datain2 <- filter(datain, generation_source == names[i])
+  p[[i]] <- datain2 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+theme(legend.position="bottom")+ggtitle(names[i])+
+  stat_smooth(formula = y ~ x,method = "lm", col = "red",aes(x = date, y = value_1))+
+  stat_smooth(formula = y ~ x, method = "lm", col = "blue",aes(x = date, y = value_2)) + stat_smooth(formula = y ~ x, method = "lm", col = "green",aes(x = date, y = value_3))
 
 }
 
@@ -467,14 +550,14 @@ Looking at violin plots for max and min:
 
 #long_gen_data[is.na(long_gen_data)] <- mean(long_gen_data$value)
 
-datain <- long_gen_data %>% group_by(generation_source, year, month) %>% summarise(across(c(value), c(max, min)))
+datain <- long_gen_data %>% group_by(generation_source, year, month) %>% summarise(across(c(value), c(max, min, mean)))
 datain2 <- datain %>%
   mutate(date = make_date(year, month))
 
 names <- unique(datain2$generation_source)
 for(i in 1:length(names)){
   datain3 <- filter(datain2, generation_source == names[i])
-  p[[i]] <- datain3 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+theme(legend.position="bottom")+ggtitle(names[i])
+  p[[i]] <- datain3 %>% ggplot()+geom_line(aes(x = date, y = value_1, color = "max"))+geom_line(aes(x = date, y = value_2, color = "min"))+geom_line(aes(x = date, y = value_3, color = "mean")) +theme(legend.position="bottom")+ggtitle(names[i])
 }
 
 do.call(grid.arrange,c(p,ncol=2))
