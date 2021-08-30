@@ -430,7 +430,7 @@ for(i in 1:length(names)){
 
 do.call(grid.arrange,c(p,ncol=2))
 ```
-```{r, include=TRUE, fig.width = 14, fig.height = 30, warning=FALSE, message = FALSE}
+```{r, include=TRUE, fig.width = 14, fig.height = 5, warning=FALSE, message = FALSE}
 library(seastests)
 library(ggfortify)
 library(zoo)
@@ -452,6 +452,21 @@ for(i in 1:length(names)){
   p[[i]] <- autoplot(decomposed) + ggtitle(names[i] )
 }
 do.call(grid.arrange,c(p,ncol=3)) 
+
+q <- list()
+names <- unique(datain$generation_source)
+
+datain3 <- filter(datain, generation_source == names[5])
+Vector1<-ts(as.numeric(datain3$value_3), frequency = 365, start = c(2015, 1))
+decomposed<-decompose(Vector1,type='additive')
+q[[1]] <- autoplot(decomposed) + ggtitle(names[5] )
+
+datain3 <- filter(datain, generation_source == names[7])
+Vector1<-ts(as.numeric(datain3$value_3), frequency = 365, start = c(2015, 1))
+decomposed<-decompose(Vector1,type='additive')
+q[[2]] <- autoplot(decomposed) + ggtitle(names[7] )
+
+do.call(grid.arrange,c(q,ncol=2)) 
 
 
 
@@ -483,12 +498,62 @@ for(i in 1:length(names)){
 
 temp[[]] %>% 
   ggplot()+
-  geom_line(aes(x = 1:length(temp[[2]]), y = normalize(as.numeric(temp[[2]]), method = "standardize", range = c(0, 1)), color = "Gas"))+
-  geom_line(aes(x = 1:length(temp[[4]]), y = normalize(as.numeric(temp[[4]]), method = "standardize", range = c(0, 1)), color = "Hard Coal"))+
-  geom_line(aes(x = 1:length(temp[[9]]), y = normalize(as.numeric(temp[[9]]), method = "standardize", range = c(0, 1)), color = "Lignite"))+
-  geom_line(aes(x = 1:length(temp[[11]]), y = normalize(as.numeric(temp[[11]]), method = "standardize", range = c(0, 1)), color = "Oil")) + xlab("Day from start") + ylab("Normalised Power Generated")
+  geom_line(aes(x = 1:length(temp[[2]])/365 + 2015, y = normalize(as.numeric(temp[[2]]), method = "standardize", range = c(0, 1)), color = "Gas"))+
+  geom_line(aes(x = 1:length(temp[[4]])/365 + 2015, y = normalize(as.numeric(temp[[4]]), method = "standardize", range = c(0, 1)), color = "Hard Coal"))+
+  geom_line(aes(x = 1:length(temp[[9]])/365 + 2015, y = normalize(as.numeric(temp[[9]]), method = "standardize", range = c(0, 1)), color = "Lignite"))+
+  geom_line(aes(x = 1:length(temp[[11]])/365 + 2015, y = normalize(as.numeric(temp[[11]]), method = "standardize", range = c(0, 1)), color = "Oil")) + xlab("Year") + ylab("Normalised Power Generated") + ggtitle("Fossil Fuel Generation Trends")
+
+temp[[]] %>% 
+  ggplot()+
+  geom_smooth(aes(x = 1:length(temp[[2]])/365 + 2015, y = normalize(as.numeric(temp[[2]]), method = "standardize", range = c(0, 1)), color = "Gas"))+
+  geom_smooth(aes(x = 1:length(temp[[4]])/365 + 2015, y = normalize(as.numeric(temp[[4]]), method = "standardize", range = c(0, 1)), color = "Hard Coal"))+
+  geom_smooth(aes(x = 1:length(temp[[9]])/365 + 2015, y = normalize(as.numeric(temp[[9]]), method = "standardize", range = c(0, 1)), color = "Lignite"))+
+  geom_smooth(aes(x = 1:length(temp[[11]])/365 + 2015, y = normalize(as.numeric(temp[[11]]), method = "standardize", range = c(0, 1)), color = "Oil")) + xlab("Year") + ylab("Normalised Power Generated")
+
+```
+```{r, include=TRUE, fig.width = 14, fig.height = 6, warning=FALSE, message = FALSE}
+library(seastests)
+library(ggfortify)
+library(zoo)
+library(tseries)
+library(astsa)
+library(BBmisc)
+library(forecast)
+library(ggplot2)
+datain <- long_gen_data %>% group_by(generation_source, year, month, day) %>% summarise(across(c(value), c(max, min, mean)))
+datain <- datain %>%
+  mutate(date = make_datetime(year, month, day))
+p <- list()
+names <- unique(datain$generation_source)
+temp <- list()
+for(i in 1:length(names)){
+  datain2 <- filter(datain, generation_source == names[i])
+  print(datain2$generation_source[1])
+  Vector1<-ts(as.numeric(datain2$value_3), frequency = 365, start = c(2015, 1))
+  decomposed<-decompose(Vector1,type='additive')
+  summary(decomposed)
+  temp[[i]] <- decomposed$seasonal
+  p[[i]] <- autoplot(decomposed) + ggtitle(names[i] )
+}
+
+temp[[]] %>% 
+  ggplot()+
+  geom_smooth(aes(x = 1:length(temp[[4]])/365 + 2015, y = normalize(as.numeric(temp[[4]]), method = "standardize", range = c(0, 1)), color = "Hard Coal"))+
+  geom_smooth(aes(x = 1:length(temp[[7]])/365 + 2015, y = normalize(as.numeric(temp[[7]]), method = "standardize", range = c(0, 1)), color = "Hydro River"))+
+   xlab("Year") + ylab("Normalised Power Generated (seasonal contibution)") + ggtitle("Seasonal Contribution")
+
+temp[[]] %>% 
+  ggplot()+
+  geom_smooth(aes(x = 1:length(temp[[4]])/365 + 2015, y = as.numeric(temp[[4]]), color = "Hard Coal"))+
+  geom_smooth(aes(x = 1:length(temp[[7]])/365 + 2015, y = as.numeric(temp[[7]]),  color = "Hydro River"))+
+   xlab("Year") + ylab(" Power Generated (seasonal contibution)") + ggtitle("Seasonal Contribution")
 
 
+temp[[]] %>% 
+  ggplot()+
+  geom_smooth(aes(x = 1:length(temp[[4]])/365 + 2015, y = as.numeric(temp[[4]]), color = "Hard Coal"))+
+  geom_smooth(aes(x = 1:length(temp[[7]])/365 + 2015, y = as.numeric(temp[[7]]),  color = "Hydro River"))+
+   xlab("Year") + ylab(" Power Generated (seasonal contibution)") + ggtitle("Seasonal Contribution")
 
 ```
 
