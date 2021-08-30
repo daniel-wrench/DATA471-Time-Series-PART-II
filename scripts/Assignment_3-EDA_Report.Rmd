@@ -277,6 +277,24 @@ data %>%
 
 From the above plot we can see that total daily power generated from photovoltaic solar systems shows little change across the years we investigated.
 
+#### Proportion of fossil fuel usage over time
+```{r test}
+fossil <- data %>%
+  select(c(Biomass,`Hard Coal`, Lignite, Gas, Oil))
+
+cbind(data[1], prop.table(as.matrix(fossil), margin = 1)) %>%
+  pivot_longer(cols = -time, names_to = "generation_source") %>%
+  group_by(generation_source) %>% 
+  summarise_by_time(time, .by = '1 month', adjusted = mean(value)) %>% 
+  ggplot() + 
+  geom_line(aes(x = time, y = adjusted, color = generation_source), stat = "identity") +
+  labs(x="Date", y="Proportion", title="Proportion of Power from Fossil Fuels by Type")+
+  scale_colour_viridis_d(name = "Fuel Type") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5)) 
+```
+
+While the total amount of power generated from fossil fuels varies over time in response to the shortfall between renewables/nuclear and consumer demand there is a very clear relationship between the proportion of power produced from Liquid Natural Gas (LNG) and Hard Coal. The rise in LNG usage is likely driven by dropping prices and the availability of infrastructure to import it en masse as Spain is home to one third of Europe’s LNG import capacity[@lng].
 
 # Individual contributions
 
