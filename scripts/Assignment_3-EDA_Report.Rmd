@@ -181,22 +181,22 @@ Availability of data and files was ensured through utilizing cloud-based platfor
 
 # Exploratory Data Analysis
 
-In the first section, [Overall statistics], we look at statistics for each source over the entire time series, and calculate correlations between sources.
+In the first section, [Summary statistics], we look at statistics for each source over the entire time series, and calculate correlations between sources.
 
 In the second section, [Time series visualisation], we investigate some of these correlations, using charts to compare how different sources vary over time with respect to one another. Here we also examine interesting long-term trends and seasonality.
 
-## Overall statistics
+## Summary statistics
 
 ```{r summary stats, echo=FALSE}
 # Changing the order of the variables from largest to smallest
 data_table <- data %>% select(c("Nuclear", "Gas", "Wind Onshore", "Hard Coal", "Hydro Reservoir", "Solar", "Hydro River", "Lignite", "Hydro Pumped", "Biomass", "Oil", "Waste", "Other Renewable", "Other"))
 # Creating CV statistic function
-CV <- function(x) sd(x)/mean(x)
+CV <- function(x) sd(x)*100/mean(x)
 f <- All(data_table) ~ Mean + SD + CV + Min + Median + Max + Histogram
-datasummary(f, data_table, output="markdown") # Previously output = "markdown"
+datasummary(f, data_table, output="markdown", fmt =  0)
 ```
 
-The table above shows summary statistics for every generation source in the dataset, ordered from largest to smallest mean hourly value. This allows a quick comparison of the magnitude and variability of each source. Of the top 5 sources, two are fossil-fuel based (Gas and Hard Coal). Nuclear is a unique source in that it has the largest average hourly generation, but a relatively low standard deviation, compared to other major sources. This combination of high mean and low variability is best summarised by the coefficient of variation (CV) statistic. Nuclear has the lowest CV out of all sources. Wind Onshore has the largest variability in hourly output, followed by Gas. Solar, however, is a source with very strong seasonality, and this is shown by its higher CV than both Wind Onshore and Gas.
+The table above shows summary statistics (to 0dp) for every generation source in the dataset, ordered from largest to smallest mean hourly value. This allows a quick comparison of the magnitude and variability of each source. Of the top five sources, two are fossil-fuel based (Gas and Hard Coal). Nuclear is a unique source in that it has the largest average hourly generation, but a relatively low standard deviation, compared to other major sources. This combination of high mean and low variability is best summarised by the coefficient of variation (CV) statistic, calculated as the standard deviation divided by the mean and then multiplied by 100. Nuclear has the lowest CV out of all sources. Wind Onshore has the largest variability in hourly output, followed by Gas. Solar, however, is a source with very strong seasonality, and this is shown by its higher CV than both Wind Onshore and Gas.
 
 As discussed in the Background section, understanding interdependencies between electricity generation sources is important to maintaining energy availability in the short- and medium-term, but also to manage energy transition in the long-term. We calculated Pearson correlation coefficients as a way of investigating linear associations in the dataset. (NB: Due to the autocorrelation properties of time series data, these should be interpreted with caution, but can still give insights into associations.)
 
@@ -205,28 +205,31 @@ As discussed in the Background section, understanding interdependencies between 
 df_corr <- data[,2:ncol(data)]
 
 corrmatrix <- df_corr %>% cor()
-corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", number.cex= 0.7, tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'n')
+corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", number.cex= 0.7, tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'b',
+         title = "Pearson correlation coefficients to 2dp", mar=c(0,0,1,0))
 ```
 
-Nuclear, the largest overall contributor to electricity generation, does not have any significant correlations (here defined as correlations with absolute value greater than 0.3). Therefore, not only is Nuclear an incredibly steady generation source, it is also one that does not obviously depend on or affect the amount of electricity produced by other sources. Solar, on the other hand, is a much more variable source, but this correlation also has no significant correlations, showing it is also a very independent generation method.
+Nuclear, the largest overall contributor to electricity generation, does not have any significant correlations (here defined as correlations with absolute value greater than 0.3). Therefore, not only is Nuclear an incredibly steady generation source, it is also one that does not obviously depend on or affect the amount of electricity produced by other sources. Solar, on the other hand, is a much more variable source, but also has no significant correlations, showing it is also a very independent generation method.
 
-Three generation sources that are very *dependent*, or closely related to other sources, are Hard Coal, Hydro River, and Other Renewable. The largest correlation in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem. Other correlations are investigated further in the discussion of the time series plots in the next section.
+Three generation sources that are very *dependent*, or closely related to other sources, are Hard Coal, Hydro River, and Other Renewable, shown by their large number of significant correlations on the correlation plot. The strongest linear association in the dataset is a positive correlation of 0.77 between Hard Coal and Lignite. Lignite is another type of coal, so it makes sense that these two sources would change in tandem. Other correlations are investigated further in the discussion of the time series plots in the next section.
 
 ## Time series visualisation
 
 The [R Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) accompanies this section of the EDA. The dashboard allows interactive exploration of each electricity generation source over time, with customisation of which time period to look at, how much to smooth the data, and how to compare the variables. Here, we focus on the most interesting patterns.
 
-The plot below shows the five sources with the greatest long-term change over the four-year period. There five sources also happen to have the lowest mean hourly values of the 14 studied in this dataset. Biomass, Oil, and Other generation sources all show a rapid decrease from a high in 2015 to a low in early 2016, with monthly averages remaining around this low for the remainder of the series. On the other hand, Waste and Other renewable sources show a sustained increase from 2015 to early 2017, and monthly averages reaming around this high value for the remainder of the series. The similar or opposite nature of the trends between these generation sources are reflected in strong positive or negative correlations. For example, Biomass and Other sources have the strongest positive linear association of any two sources in the data, with a correlation of 0.66. Meanwhile, the opposing trends mean that Biomass and Other renewable sources have the strongest negative linear association of any two sources, with a correlation of 0.56.
-
-Unlike with Hard Coal and Lignite, or Hydro River and Hydro Reservoir, it is not immediately obvious why these sources follow similar or opposite trends. Also, due to their low contribution to overall electricity generation, these marked long-term trends do not have a large effect on total energy output.
+The plot below shows the five sources with the greatest long-term change over the four-year period. (These five sources also happen to have the lowest mean hourly values of the 14 studied in this dataset.)
 
 <center>
 
-![**Monthly averages of Biomass, Oil, Other Renewable, Other, and Waste**](../figures/5_sources.png){width="80%"}
+![**Monthly averages of Biomass, Oil, Other, Other Renewable, and Waste**](../figures/5_sources.png){width="80%"}
 
 </center>
 
-Hard Coal and Hydro River, as shown in the correlation plot, are the two least independent generation sources - in other words, those most related to the values of other sources. The plot below shows some examples of this interdependence, by plotting the mean-centered variation over time of Hard Coal, Hydro River, and Hydro Reservoir.
+Biomass, Oil, and Other generation sources all show a rapid decrease from a high in 2015 to a low in early 2016, followed by a relatively constant long-term trend for the rest of the series. On the other hand, Waste and Other renewable sources show a sustained increase from 2015 to early 2017, and again followed by a relatively constant long-term trend the remainder of the series. The similar or opposite nature of the trends between these generation sources are reflected in strong positive or negative correlations. For example, Biomass and Other sources have the second strongest positive linear association of any two sources in the data, with a correlation of 0.66. Meanwhile, the opposing trends mean that Biomass and Other Renewable sources have the strongest negative linear association of any two sources, with a correlation of 0.56.
+
+Unlike with Hard Coal and Lignite, or Hydro River and Hydro Reservoir, it is not immediately obvious why these sources follow similar or opposite trends. Also, due to their low contribution to overall electricity generation, these marked long-term trends do not have a large effect on total energy output.
+
+Hard Coal and Hydro River, as shown in the correlation plot, are two sources with several large correlations with other sources. The plot below shows some examples of this interdependence, by plotting the mean-centered variation over time of Hard Coal, Hydro River, and Hydro Reservoir.
 
 ```{r mean centered}
 center_scale <- function(x) {
@@ -251,17 +254,17 @@ ggplot(data_centered)+
 
 </center>
 
-Due to the way the peaks and troughs of each source are either in phase or 180$^\circ$ out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between both these sources and Hard Coal (correlation with Hydro Reservoir = -0.16, with Hydro River = -0.5). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.
+Due to the way the peaks and troughs of each source are either in phase or 180$^\circ$ out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between Hard Coal and both these sources (correlation with Hydro River = -0.5, with Hydro Reservoir = -0.16). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.
 
 The most obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 8am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
 
 <center>
 
-![**A subset of hourly averages of a subset of Solar**](../figures/solar_hourly.png){width="80%"}
+![**A subset of hourly averages of Solar**](../figures/solar_hourly.png){width="80%"}
 
 </center>
 
-In the next plot we can see that Solar is seasonal on a monthly scale. Electricity generation by solar peaks at around 2000MW in June or July each year, and hits a low of between 800MW and 1000MW in November or December each year. Once again, this periodicity makes intuitive sense, with higher generation in the summer months and lower generation in the winter months.
+In the next plot we can see that Solar is also seasonal on a monthly scale. Electricity generation by solar peaks at around 2000MW in June or July each year, and hits a low of between 800MW and 1000MW in November or December each year. Once again, this periodicity makes intuitive sense, with higher generation in the summer months and lower generation in the winter months.
 
 <center>
 
