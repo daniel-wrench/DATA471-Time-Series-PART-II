@@ -341,6 +341,15 @@ cbind(data[1], prop.table(as.matrix(fossil), margin = 1)) %>%
 
 *1 page, 2 marks*
 
+The structure and responsibilities of our team were initially defined as follows:
+<center>
+
+![](../figures/team_roles.png){width="80%"}
+
+</center>
+
+In addition to these, each member of the team carried out a variety of other functions as the need arose.
+
 *Quick bullet points before writing up*
 
 Daniel P:
@@ -365,6 +374,8 @@ Daniel W:
 -   Investigated and wrote about correlations, long-term trends and seasonality
 -   Proof-read and edited Ethics, Privacy and Security section.
 -   wider literature review
+
+
 
 # Conclusion
 
