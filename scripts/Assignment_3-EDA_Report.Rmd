@@ -2,10 +2,6 @@
 title: "EDA of Spanish electricity generation 2015-2018"
 subtitle: 'Group 16: Time Series - Assignment 3 - EDA Report'
 output:
-  pdf_document:
-    latex_engine: xelatex
-    toc: no
-    toc_depth: '2'
   html_document:
     toc: yes
     toc_depth: 2
