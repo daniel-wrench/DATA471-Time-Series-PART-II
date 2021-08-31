@@ -2,14 +2,14 @@
 title: "EDA of Spanish electricity generation 2015-2018"
 subtitle: 'Group 16: Time Series - Assignment 3 - EDA Report'
 output:
-  html_document:
-    toc: yes
-    toc_depth: 2
-    fig_caption: yes
   pdf_document:
     latex_engine: xelatex
     toc: no
     toc_depth: '2'
+  html_document:
+    toc: yes
+    toc_depth: 2
+    fig_caption: yes
 bibliography: references.bib 
 csl: annals-of-data-science.csl
 link-citations: true
@@ -205,7 +205,7 @@ As discussed in the Background section, understanding interdependencies between 
 df_corr <- data[,2:ncol(data)]
 
 corrmatrix <- df_corr %>% cor()
-corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", number.cex= 0.7, tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'b',
+corrplot(corrmatrix, method = "color", addCoef.col="black", order = "FPC", number.cex= 0.5, tl.cex=0.5, tl.col = "black", type = 'lower', cl.pos = 'b',
          title = "Pearson correlation coefficients to 2dp", mar=c(0,0,1,0))
 ```
 
@@ -256,11 +256,10 @@ ggplot(data_centered)+
 
 Due to the way the peaks and troughs of each source are either in phase or 180$^\circ$ out of phase, we clearly observe a close positive correlation between the two Hydro sources (correlation = 0.65), and a negative correlation between Hard Coal and both these sources (correlation with Hydro River = -0.5, with Hydro Reservoir = -0.16). The reason behind these relationships is likely to be that a more reliable energy source such as a coal is used to generate electricity when renewable (and therefore more desired) sources such as hydro power have lower output than is needed.
 
-The most obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking between 11am and 2pm and hitting a low at 8am and the few hours prior. This is an intuitive periodicity: a location receives the most sunlight around noon, and no sunlight during the night.
-
+The most obvious seasonality we detected was for Solar generation. In fact, Solar displayed seasonality on two different scales. In the following plot below we can see that this variable is seasonal on a daily scale, peaking at around 3000-4000MW/hour between 12pm and 2pm and reaching a low of 40-600MW/hour between 11pm and 6pm. This is an intuitive periodicity: solar plants produce most electricity when they are receiving the most sunlight around noon, and much less during the night when it is dark.
 <center>
 
-![**A subset of hourly averages of Solar**](../figures/solar_hourly.png){width="80%"}
+![**Hourly averages of Solar (subset from July 2018)**](../figures/solar_hourly.png){width="80%"}
 
 </center>
 
@@ -339,32 +338,26 @@ As discussed in assignment 2, each member independently researched topics for th
 
 In addition to these, each member of the team carried out a variety of other functions as the need arose.
 
-Daniel P:
+**Daniel P**
 
 Daniel P served as the repository manager which involved setting up the [Github repository](https://github.com/danielpetterson/DATA471-Time-Series) and ensuring that it was well organised and any conflicts were dealt with. Daniel P also built the [Shiny dashboard](https://danielpetterson.shinyapps.io/scripts/) to allow in-demand analysis of the data by the various stakeholders.
 
 The primary focus of his section of literature review was the change in national energy generation capacity in the years leading up to the time our data was collected and the impact of environmental or financial variables in that time frame. In addition to this he analysed changes in fossil fuel generation methods and how they reacted to changes in renewable energy generation.
 
-Rob:
+**Rob**
 
-Rob took on the role of timeline/project manager. This initially involved the set up of the online work space in Microsoft Teams, including the Kandban  board and project timeline in the form of Gantt Charts. These were maintained throughout the project, updating with new tasks and marking as in progress or complete so that progress could be quantified, ensuring the project remained on track. The workspace also brought in polls for when to have meetings and easy access to both the Git repository and overleaf.
+Rob took on the role of timeline/project manager. This initially involved the set up of the online workspace in Microsoft Teams, including the Kanban board and project timeline in the form of Gantt charts. These were maintained throughout the project, updating with new tasks and marking as in-progress or complete so that progress could be quantified, ensuring the project remained on track. The workspace also featured polls for when to have meetings and easy access to the Git repository.
 
-Rob conducted both wider literature review and data analysis. The literature review focused primarily on the political environment present in Spain at the time to better understand some of the drivers for the trends seen. Further to this he examined different energy time series analysis studies and the techniques utilised within them to help inform the most appropriate approached to apply to this study. His analysis focused on the seasonal decomposition and trend isolation within the data as well as a distribution analysis to examine the behavior of the sources independently within the time series.
+Rob also conducted both wider literature review and data analysis. The literature review focused primarily on the political environment present in Spain at the time to better understand some of the drivers for the trends seen. Further to this he examined different energy time series analysis studies and the techniques utilised within them to help inform the most appropriate approached to apply to this study. His analysis focused on the seasonal decomposition and trend isolation within the data, as well as a distribution analysis to examine the behavior of the sources independently within the time series.
 
-Beyond this, Rob took responsibility for the consideration and write up of ethics, privacy and security concerns relating to this project as well as contributing towards the data analysis write up, and reviewing the some of the Shiny app code.
+Beyond this, Rob took responsibility for the consideration and write up of ethics, privacy and security concerns relating to this project, as well as contributing towards the data analysis write-up, and reviewing some of the Shiny app code.
 
-Daniel W:
+**Daniel W**
 
--   Document and bibliography manager
--   Investigated and wrote about outliers and effect of linear interpolation
--   Investigated and wrote about correlations, long-term trends and seasonality
--   Proof-read and edited Ethics, Privacy and Security section.
--   wider literature review
-
-
+Daniel W was the document and bibiography manager. As part of this he was in charge of structuring, proof-reading, and editing the report. During the data preparation stage, he investigated missing data, outliers, and the effect of linear interpolation. During the analysis stage, he investigated correlations, long-term trends, and seasonality. He then produced plots and wrote about these in the final report. He also contributed to the literature review and helped to identify issues during development of the Shiny dashboard.
 
 # Conclusion
 
-An Exploratory Data Analysis of electricity generation in Spain between 2015 and 2018 was conducted to investigate how the generation by different sources has changed over time. This dataset required cleaning of a small number of missing values and outliers, which were filled in by linear interpolation. We found that nuclear is the most important generation source over the period, not only due to its high mean output but also its low variability. A number of low-output sources showed significant long-term change in their average output. Seasonality was observed in solar generation (on two scales), and to a lesser extent in hydroelectric sources. The overall generation amount remained roughly constant for Spain and as such this seasonality induced echo seasonality in some of the fossil fuel sources. This analysis could help inform government policy around clean energy investment, and there were some concerns around ethical implications of how this research could affect future policy around climate change and affordable energy.
+An exploratory data analysis of electricity generation in Spain between 2015 and 2018 was conducted to investigate how generation by different sources has changed over time. This dataset required cleaning of a small number of missing values and outliers; these  were filled in using linear interpolation. We found that Nuclear was the most important generation source over the period, not only due to its high mean output but also its low variability. A number of low-output sources showed significant long-term change in their average output. Seasonality was observed in solar generation (on two scales), and to a lesser extent in hydroelectric sources. The overall generation amount remained roughly constant for Spain and as such this seasonality induced echo seasonality in some of the fossil fuel sources. This analysis could help inform government policy around clean energy investment, and there were some concerns around ethical implications of how this research could affect future policy around climate change and affordable energy.
 
 # References
