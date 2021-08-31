@@ -298,24 +298,10 @@ While other seasonal effects are less clear, by deconstructing the signal we cou
 
 </center>
 
-*QUESTION*
-
-Dont know whether to plot or bring in the below - as mentioned above - shows perfect anti phase of hydro and coal in this case seasonal component - ive actually just seen this is gone into above - brain fried deel free to remove
-
-<center>
-
-![**Signal Decomposition of Hydro Sources**](../figures/hydro_coal.png){width="80%"}
-
-</center>
 
 #### Proportion of fossil fuel usage over time
 
-*NEED TO REFERENCE PROPERLY - WILL DO IN MORNING*
-
-*Some interp tenuous here - included to discuss tomorrow*
-
-Overall we see a number of trends, further to the seasonality deficit, that underlay the fossil fuel usage over time. As shown below, once seasonality and variance are removed, all display a trend of decreasing to mid 2016, then increasing to mid 2017 before decreasing afterwards. While the inflection points are not identical, they are extremely similar and as such can likely be partially explained by common political factors. The first inflection point centres around June 2016, a Spanish general election with issues centering around green energy and environmental friendliness. Articles talk about the drive at the time to support renewable energy and the uncertainty in the fossil fuel sector which lead to a diversification away from them [@fitch]. In early 2017 the Spanish government implemented the energy efficiency action plan[@actionplan] which reaffirms and incentivises the use of non fossil fuel based energy, again leading to the diversification away from them and leading to a decrease in the generation from them.
-
+Overall we see a number of trends, further to the seasonality deficit, that underlay the fossil fuel usage over time. As shown below, once seasonality and variance are removed, all display a trend of decreasing to mid 2016, then increasing to mid 2017 before decreasing afterwards. While the inflection points are not identical, they are extremely similar and as such can likely be partially explained by common political factors. The first inflection point centres around June 2016, a Spanish general election with issues centering around green energy and environmental friendliness. Articles talk about the drive at the time to support renewable energy and the uncertainty in the fossil fuel sector which lead to a diversification away from them [@fitch]. Following this Spain had an exceptionally dry year [@fernandez_2021], leading to the much lower seasonal peak seen in hydro and so we see a steady increase in fossil fuel sources to compensate. In early 2017 the Spanish government implemented the energy efficiency action plan [@government_2017] which reaffirms and incentivises the use of non fossil fuel based energy which combined with increased rainfall again led to the diversification away from them and leading to a decrease in the generation from them.
 <center>
 
 ![**Signal Decomposition of Hydro Sources**](../figures/fossil_trends.png){width="80%"}
