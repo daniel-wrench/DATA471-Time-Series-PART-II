@@ -22,7 +22,7 @@ ui <- dashboardPage(
 
     # Sidebar with a slider input for number of bins 
     dashboardSidebar(
-            selectInput("time_period_select", "Smoothing Time Interval",
+            selectInput("time_period_select", "Use Average of Each",
                         c("Hour" = "hour",
                           "Day" = "day",
                           "Week" = "week",
